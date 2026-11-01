@@ -1,0 +1,2 @@
+# Optional, needed only to rebuild the static SVG figures.
+fonttools[woff]==4.68.0
