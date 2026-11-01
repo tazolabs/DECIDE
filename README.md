@@ -8,7 +8,7 @@ the next turn, and interpreting emotion, speakers, disturbance and language chan
 
 [Website](https://decide-benchmark.vercel.app) · **Paper / arXiv: coming soon** ·
 [Audio examples](https://decide-benchmark.vercel.app/#examples) ·
-[Model submissions](mailto:support@tazolabs.com?subject=DECIDE%20model%20submission)
+[Evaluate a model](https://decide-benchmark.vercel.app/evaluate)
 
 DECIDE v1.0 contains **4,867 decision questions over 1,081 audio clips and 32 tasks**.
 Clips are 3–25 seconds long and come from 570 production calls across 34 agents,
@@ -58,27 +58,59 @@ context; the private v1.0 bundle preserves the recorded benchmark prompts.
 
 ## Evaluation
 
-### Full benchmark: bring the model to the data
+### Full benchmark: submit your model API
 
-Participants do not download the benchmark, receive Hugging Face access, or run
-full evaluation on their devices. The intended workflow is:
+Use the [hosted evaluation page](https://decide-benchmark.vercel.app/evaluate), or
+submit from this CLI. Request an invitation from
+[support@tazolabs.com](mailto:support@tazolabs.com?subject=DECIDE%20evaluation%20invitation)
+with your model's HTTPS endpoint. Invitations are endpoint-bound, expire, and
+have a run quota. First verify the [model API contract](docs/hosted-api.md).
 
-1. Submit model weights and inference code, or a compatible inference container.
-2. Benchmark operators review and run the model on controlled, isolated infrastructure.
-3. Private workers load the benchmark internally and score predictions against private labels.
-4. Participants receive reviewed aggregate metrics and task-level breakdowns only.
+Set these values in your local `.env` (never commit it):
 
-**A public hosted submission service is not yet implemented.** Contact
-[support@tazolabs.com](mailto:support@tazolabs.com?subject=DECIDE%20model%20submission)
-to discuss the model and execution requirements. The public repository currently
-supports local integration tests on the six previews, plus an internal operator
-entry point. Do not interpret the local runner as a secure sandbox for submitted code.
+```dotenv
+DECIDE_SUBMISSION_TOKEN=your-invitation-token
+MODEL_API_KEY=your-model-api-key
+```
 
-Calling a participant-controlled model API sends that operator the benchmark
-inputs. That is incompatible with keeping the inputs hidden from the model owner.
-Strict private evaluation requires executing the model within controlled infrastructure,
-with restricted network access and controlled outputs. Private storage credentials,
-raw logs, per-question predictions and reference labels are not shared with participants.
+Start with the six public integration examples, then submit the full benchmark
+using a **new receipt path**:
+
+```bash
+python evaluation.py submit --endpoint https://api.example.com/v1/decisions \
+  --model my-model-version --modality audio --mode preview \
+  --receipt runs/my-preview-receipt.json
+python evaluation.py status --receipt runs/my-preview-receipt.json --wait
+
+python evaluation.py submit --endpoint https://api.example.com/v1/decisions \
+  --model my-model-version --modality audio \
+  --receipt runs/my-benchmark-receipt.json
+python evaluation.py status --receipt runs/my-benchmark-receipt.json --wait
+```
+
+Use `--modality text` for a text model. The worker supplies the release's frozen
+STT text with the corresponding text prompt; participants do not run STT or
+receive its transcripts. The CLI submits configuration only and downloads no
+benchmark files. The job continues if your terminal or browser closes. Retry a
+failed submission with the **same receipt path and settings** to avoid creating
+a duplicate job. Keep receipts private: they grant read/cancel access to results.
+
+```bash
+python evaluation.py cancel --receipt runs/my-benchmark-receipt.json
+```
+
+The worker retrieves private data, sends permitted model inputs, and scores
+responses against private references. Only aggregate results are returned after
+completion. API keys are encrypted while queued/running and deleted on completion,
+failure or cancellation. Small breakdown cells (<10 questions) are suppressed.
+Model API usage is billed by your provider, including any retries.
+
+**Privacy boundary:** the external model API operator receives inference inputs
+(audio or STT text, prompts and permitted context). This is an API-based evaluation,
+not a mechanism to hide inputs from that operator. Reference labels, private
+storage credentials, downloadable dataset files and per-question results are not
+shared. Participants who require zero input disclosure would need a separately
+arranged model-to-data execution environment.
 
 ### Test your integration on the six public examples
 
@@ -126,8 +158,8 @@ Each prediction must include the public example ID and a valid choice:
 {"id": "example-04", "choice": "caller"}
 ```
 
-The public CLI has no `download` command or private `--data` option and requires
-`--preview`. The six-example score is an integration check, not a full benchmark score.
+The public CLI has no `download` command or private `--data` option. Local
+validation, inference and scoring require `--preview`; hosted commands use job receipts. The six-example score is an integration check, not a full benchmark score.
 Re-running the same preview command/output directory resumes successful results;
 use a new directory after changing model code or configuration.
 
@@ -149,9 +181,9 @@ See [the protocol](docs/protocol.md) and the [internal dataset format](docs/data
 
 ## Website
 
-The website is buildless HTML/CSS/JavaScript in `site/`. Only that directory is
-deployed to Vercel; the `.vercelignore` allowlist excludes Python code, local
-downloads, credentials and evaluation outputs from deployment uploads.
+The website is buildless HTML/CSS/JavaScript in `site/`. That directory supplies public assets. The `api/` and `server/` modules run the
+hosted evaluator on Vercel with a private queue and Neon database. The deployment
+allowlist excludes Python code, local datasets, credentials and evaluation outputs.
 
 ```bash
 python3 -m http.server 8080 --directory site

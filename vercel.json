@@ -4,6 +4,16 @@
   "buildCommand": null,
   "outputDirectory": "site",
   "cleanUrls": true,
+  "regions": ["iad1"],
+  "functions": {
+    "api/evaluations.mjs": { "maxDuration": 60 },
+    "api/consume.mjs": {
+      "maxDuration": 300,
+      "memory": 2048,
+      "includeFiles": "site/preview/**",
+      "experimentalTriggers": [{ "type": "queue/v2beta", "topic": "decide-evaluations" }]
+    }
+  },
   "headers": [
     { "source": "/(.*)", "headers": [
       { "key": "X-Content-Type-Options", "value": "nosniff" },

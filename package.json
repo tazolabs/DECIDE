@@ -1,0 +1,20 @@
+{
+  "name": "decide-hosted-evaluation",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "test": "node --test tests/hosted.test.mjs",
+    "db:setup": "node --env-file=.env.hosted.local tools/hosted-admin.mjs setup",
+    "invite": "node --env-file=.env.hosted.local tools/hosted-admin.mjs invite"
+  },
+  "dependencies": {
+    "@neondatabase/serverless": "1.2.0",
+    "@vercel/queue": "0.10.0",
+    "ipaddr.js": "2.5.0",
+    "undici": "8.12.3"
+  }
+}
