@@ -29,7 +29,7 @@ assert sum(row[1] for row in FAMILIES) == 4867
 class Figure:
     def __init__(self, width, height, title, description):
         self.width, self.height = width, height
-        self.parts = [f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {width} {height}" role="img" aria-labelledby="title desc">',
+        self.parts = [f'<svg xmlns="http://www.w3.org/2000/svg" width="{width}" height="{height}" viewBox="0 0 {width} {height}" role="img" aria-labelledby="title desc">',
                       f'<title id="title">{escape(title)}</title><desc id="desc">{escape(description)}</desc>',
                       f'<rect width="{width}" height="{height}" fill="{PAPER}"/>']
 
