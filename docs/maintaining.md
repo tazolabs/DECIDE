@@ -3,10 +3,24 @@
 ## Dataset access
 
 The full dataset lives in the **private** Hugging Face dataset repository
-`tazolabs/DECIDE`. Grant access only to approved evaluators using Hugging Face's
-organization/repository access controls. Never make the repository public or
-place a Hugging Face token in the website. The website has no server, database,
-private-data proxy or model credentials.
+`tazolabs/DECIDE`. Restrict read access to benchmark operators and controlled
+evaluation workers. Do not grant dataset access to participants, model submitters
+or their inference endpoints. Never make the repository public or place a Hugging
+Face token in the website. The current website is static; a public hosted
+submission service has not yet been implemented.
+
+`evaluation.py` is preview-only. On operator-controlled infrastructure, internal
+evaluation remains available through `tools/maintainer_evaluation.py`:
+
+```bash
+python tools/maintainer_evaluation.py download --revision v1.0
+python tools/maintainer_evaluation.py validate --data data/decide-v1
+```
+
+The separate entry point is a workflow distinction, not a security boundary.
+Storage credentials and execution isolation must enforce privacy. Do not return
+private per-question logs, text, audio, predictions or reference labels to
+participants. Use reviewed aggregate reports for full benchmark results.
 
 The public release exposes six explicitly selected preview questions and clips.
 Do not copy the original call corpus, app backups or evaluation run directories

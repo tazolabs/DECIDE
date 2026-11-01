@@ -1,4 +1,8 @@
-# Dataset format
+# Dataset format (for benchmark operators)
+
+This documents the internal storage format, not a participant download workflow.
+Full data access is restricted to benchmark operators and controlled workers.
+The public integration format can be explored using the six preview examples.
 
 Private dataset repository: `tazolabs/DECIDE`, type `dataset`, tag `v1.0`.
 

@@ -54,7 +54,21 @@ confidence intervals, resample source-call groups, not independent question rows
 
 ## Privacy and versions
 
-Authentication is needed to download the full dataset. The evaluator is a local
-tool for authorized users, not a public endpoint exposing private data or labels.
-Data and references are versioned independently of mutable app annotations. New
-annotations should produce a new dataset tag and new evaluation outputs.
+Participants must not download or inspect the full dataset. Private storage
+credentials are restricted to benchmark operators and controlled evaluation
+workers. The public CLI runs only the six preview examples. Full evaluation
+uses the internal operator entry point; a public hosted submission service is
+not yet available.
+
+To keep data hidden from model owners, submitted models must execute inside
+controlled, isolated infrastructure. Calling a submitter-controlled API sends
+that operator benchmark inputs, even if the call originates from our server;
+it does not meet the strict non-disclosure protocol. Participant-supplied code
+also needs isolation, restricted network access, and controlled outputs before
+it can process private inputs. Moving the existing local runner to a server is
+not sufficient by itself.
+
+Only reviewed aggregate scores and task-level summaries should be returned to
+participants, without private row identifiers, per-question outputs, logs or
+answers. Data and references are versioned independently of mutable app
+annotations. New annotations should produce a new dataset tag and new outputs.
