@@ -21,6 +21,10 @@ contains the integration toolkit, website, and exactly six preview examples.
 Full recordings, transcripts, contexts and reference labels remain in private
 maintainer-controlled storage. Participants must not be granted dataset access.
 
+![DECIDE overview: real call clips and permitted context support six families of local decisions.](site/assets/figures/benchmark-overview.svg)
+
+*Short clips from production calls, permitted context and candidate decisions form a local decision task. Waveforms in this overview are schematic.*
+
 ## Tasks
 
 | Family | Examples | Questions |
@@ -31,6 +35,8 @@ maintainer-controlled storage. Participants must not be granted dataset access.
 | Turn taking | Agent, caller, end call or insufficient evidence | 376 |
 | Voice properties | Caller emotion, speaker count and disturbance | 1,886 |
 | Language switching | A change of spoken language within the clip | 331 |
+
+![DECIDE question distribution: business and conversation 1,403; graph routing 743; tool decisions 128; turn taking 376; voice properties 1,886; language switching 331. Total 4,867.](site/assets/figures/decision-families.svg)
 
 The model sees an exact audio clip, a question and ordered candidate decisions,
 plus permitted context where relevant. It must select one candidate at the clip's
@@ -198,7 +204,8 @@ python3 -m http.server 8080 --directory site
 The paper button is deliberately marked **Coming soon**. When arXiv is available,
 update the button in `site/index.html`, the README links and the citation.
 
-Maintainers: see [release and deployment instructions](docs/maintaining.md).
+Maintainers: see [release and deployment instructions](docs/maintaining.md) and
+[the visual style and figure-generation guide](docs/visual-style.md).
 
 ## Citation
 

@@ -1,1 +1,12 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="12" fill="#007c70"/><path d="M17 15h13c14 0 21 7 21 17S44 49 30 49H17zm9 8v18h4c8 0 12-3 12-9s-4-9-12-9z" fill="#fff"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <style>
+    .tile { fill: #f6f9f9; stroke: #c9d6d6; }
+    .m { color: #00897b; }
+    @media (prefers-color-scheme: dark) {
+      .tile { fill: #061214; stroke: #1c2e30; }
+      .m { color: #19c2ad; }
+    }
+  </style>
+  <rect class="tile" x="0.5" y="0.5" width="31" height="31" rx="7"/>
+  <g class="m" fill="none" transform="translate(16 16) scale(0.27) translate(-50 -50)"><path d="M76.63,54.48 A27,27 0 0 1 54.48,76.63" fill="none" stroke="currentColor" stroke-opacity="1.0" stroke-width="12"/><path d="M45.52,76.63 A27,27 0 0 1 23.37,54.48" fill="none" stroke="currentColor" stroke-opacity="1.0" stroke-width="12"/><path d="M23.37,45.52 A27,27 0 0 1 45.52,23.37" fill="none" stroke="currentColor" stroke-opacity="1.0" stroke-width="12"/><path d="M54.48,23.37 A27,27 0 0 1 76.63,45.52" fill="none" stroke="currentColor" stroke-opacity="1.0" stroke-width="12"/><path d="M85.22,75.52 A43.5,43.5 0 0 1 32.26,89.72" fill="none" stroke="currentColor" stroke-opacity="0.42" stroke-width="9"/><path d="M24.48,85.22 A43.5,43.5 0 0 1 10.28,32.26" fill="none" stroke="currentColor" stroke-opacity="0.42" stroke-width="9"/><path d="M14.78,24.48 A43.5,43.5 0 0 1 67.74,10.28" fill="none" stroke="currentColor" stroke-opacity="0.42" stroke-width="9"/><path d="M75.52,14.78 A43.5,43.5 0 0 1 89.72,67.74" fill="none" stroke="currentColor" stroke-opacity="0.42" stroke-width="9"/><circle cx="50" cy="50" r="10.5" fill="currentColor"/></g>
+</svg>
