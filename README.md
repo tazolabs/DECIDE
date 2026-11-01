@@ -8,7 +8,7 @@ the next turn, and interpreting emotion, speakers, disturbance and language chan
 
 [Website](https://decide-benchmark.vercel.app) · **Paper / arXiv: coming soon** ·
 [Audio examples](https://decide-benchmark.vercel.app/#examples) ·
-[Request access](mailto:support@tazolabs.com?subject=DECIDE%20benchmark%20access)
+[Model submissions](mailto:support@tazolabs.com?subject=DECIDE%20model%20submission)
 
 DECIDE v1.0 contains **4,867 decision questions over 1,081 audio clips and 32 tasks**.
 Clips are 3–25 seconds long and come from 570 production calls across 34 agents,
@@ -16,10 +16,10 @@ supplied by [Bolna](https://www.bolna.ai/). The benchmark predominantly covers
 college-admissions conversations in English and Hindi. A clip can support multiple
 decision questions. The human annotation team comprised four annotators.
 
-**The full benchmark is private.** This public repository contains the evaluation
-code, website, and exactly six preview examples. Full audio, transcripts, contexts
-and reference labels are stored in a [private Hugging Face dataset](https://huggingface.co/datasets/tazolabs/DECIDE).
-A private-repository link may return 404 until your account is granted access.
+**The full benchmark is not distributed to participants.** This public repository
+contains the integration toolkit, website, and exactly six preview examples.
+Full recordings, transcripts, contexts and reference labels remain in private
+maintainer-controlled storage. Participants must not be granted dataset access.
 
 ## Tasks
 
@@ -58,80 +58,33 @@ context; the private v1.0 bundle preserves the recorded benchmark prompts.
 
 ## Evaluation
 
-### 1. Obtain the private benchmark
+### Full benchmark: bring the model to the data
 
-Request access from the maintainers and authenticate with the Hugging Face account
-that was granted access. A Hugging Face token does not by itself grant permission.
+Participants do not download the benchmark, receive Hugging Face access, or run
+full evaluation on their devices. The intended workflow is:
 
-```bash
-hf auth login
-python evaluation.py download --revision v1.0
-python evaluation.py validate --data data/decide-v1
-```
+1. Submit model weights and inference code, or a compatible inference container.
+2. Benchmark operators review and run the model on controlled, isolated infrastructure.
+3. Private workers load the benchmark internally and score predictions against private labels.
+4. Participants receive reviewed aggregate metrics and task-level breakdowns only.
 
-Alternatively, use a maintainer-provided local export via `--data /path/to/export`.
-Downloads go into the ignored `data/` directory. The version is pinned to the
-`v1.0` dataset tag by default. Future annotation changes require a new release;
-they do not silently alter published v1.0 results.
+**A public hosted submission service is not yet implemented.** Contact
+[support@tazolabs.com](mailto:support@tazolabs.com?subject=DECIDE%20model%20submission)
+to discuss the model and execution requirements. The public repository currently
+supports local integration tests on the six previews, plus an internal operator
+entry point. Do not interpret the local runner as a secure sandbox for submitted code.
 
-### 2. Run Tazo with audio
+Calling a participant-controlled model API sends that operator the benchmark
+inputs. That is incompatible with keeping the inputs hidden from the model owner.
+Strict private evaluation requires executing the model within controlled infrastructure,
+with restricted network access and controlled outputs. Private storage credentials,
+raw logs, per-question predictions and reference labels are not shared with participants.
 
-Copy `.env.example` to `.env` and set `TAZO_BEARER_TOKEN`. Keep credentials local.
+### Test your integration on the six public examples
 
-```bash
-# Smoke test: six public examples.
-python evaluation.py run --preview --provider tazo --output runs/tazo-preview
-
-# Full benchmark: uses the exact versioned audio prompts and clips.
-python evaluation.py run --data data/decide-v1 --provider tazo \
-  --model tazo-large --concurrency 2 --requests-per-second 1 \
-  --output runs/tazo-v1
-```
-
-### 3. Run the STT + Jev baseline
-
-Set `JEV_API_KEY` in `.env`.
-
-```bash
-python evaluation.py run --preview --provider jev --output runs/jev-preview
-
-python evaluation.py run --data data/decide-v1 --provider jev \
-  --model jev-1.13.0 --concurrency 2 --requests-per-second 1 \
-  --output runs/jev-v1
-```
-
-This adapter uses **frozen Sarvam STT representations bundled privately with the
-benchmark**, including anonymous speaker segments and timestamps. It sends JSON
-to Jev and never sends audio to Jev. It does not re-transcribe audio or incur new
-STT charges. Transcription settings are recorded per question: the original
-comparison used `transcribe` for business/voice/tools and `translit` for
-routing/turn/language tasks. Audio and text prompt variants retain their recorded
-instructions, including text-modality guidance; they are not claimed to be
-identical prompts or an isolated test of modality.
-
-To evaluate a different STT system, use a custom audio-mode adapter that transcribes
-the supplied WAV before calling your text decision model. Record the STT/model
-versions and prompt changes with your results. Do not use the source transcript
-as a substitute for STT.
-
-### 4. Use your own model
-
-Implement `predict(example)` in a Python module. See
-[`examples/custom_model.py`](examples/custom_model.py) for the input contract.
-The function receives only the selected modality, allowed context, question,
-criteria and metadata. Reference answers are never passed to the function.
-
-```bash
-python evaluation.py run --preview \
-  --predictor examples.my_model:predict --modality audio \
-  --model my-model-version --output runs/my-model-preview
-
-python evaluation.py run --data data/decide-v1 \
-  --predictor examples.my_model:predict --modality text \
-  --model my-text-model-version --output runs/my-text-model-v1
-```
-
-Return an option ID, `{"choice": "option_id"}`, or a complete distribution:
+Copy `examples/custom_model.py` to `examples/my_model.py` and implement `predict(example)`.
+Your callback receives permitted context, instructions, ordered criteria and, in
+`audio` mode, the exact preview WAV path. Return an allowed choice ID or a distribution:
 
 ```python
 {"choice": "caller", "probabilities": {
@@ -139,48 +92,60 @@ Return an option ID, `{"choice": "option_id"}`, or a complete distribution:
 }}
 ```
 
-Option IDs must exactly match that question's criteria. Probability keys must
-match all choices, values must sum to one, and the chosen ID must have maximal
-probability. Custom predictors may run concurrently; use `--concurrency 1` for
-models that require serial execution. The shared rate limiter applies to built-in
-provider adapters; custom adapters must handle their own API limits and retries.
+The options vary per question; preserve their IDs and order. Reference answers
+are never passed to the predictor callback. In `text` mode, the supplied STT
+representation is in `example["request"]["state"]["clip_transcript"]`.
 
-### 5. Score predictions produced elsewhere
+```bash
+python evaluation.py run --preview \
+  --predictor examples.my_model:predict --modality audio \
+  --model my-model-version --concurrency 1 --output runs/my-model-preview
+```
 
-Write one JSON object per line, using the supplied question IDs:
+For built-in adapters, set the corresponding key in `.env`:
+
+```bash
+python evaluation.py run --preview --provider tazo --output runs/tazo-preview
+python evaluation.py run --preview --provider jev --output runs/jev-preview
+```
+
+The Jev preview uses bundled STT text and does not send audio to Jev. Your own
+API can be used for these **public previews**. It is not a route to hidden full-data
+access. Custom predictors must handle their own rate limits and retries.
+
+To score predictions for the six previews produced elsewhere:
+
+```bash
+python evaluation.py score --preview --predictions my-preview-predictions.jsonl \
+  --output runs/my-preview-score.json
+```
+
+Each prediction must include the public example ID and a valid choice:
 
 ```json
 {"id": "example-04", "choice": "caller"}
 ```
 
-```bash
-python evaluation.py score --preview --predictions my-predictions.jsonl \
-  --output runs/my-preview-score.json
+The public CLI has no `download` command or private `--data` option and requires
+`--preview`. The six-example score is an integration check, not a full benchmark score.
+Re-running the same preview command/output directory resumes successful results;
+use a new directory after changing model code or configuration.
 
-python evaluation.py score --data data/decide-v1 \
-  --predictions my-full-predictions.jsonl --output runs/my-full-score.json
-```
+### Internal scoring and versioning
 
-Scoring rejects unknown/duplicate IDs, out-of-vocabulary choices and invalid
-probability distributions. Missing or explicitly failed rows count as incorrect
-in the main accuracy. Coverage and accuracy over valid predictions are reported
-separately. Reports include per-task, per-family and duration breakdowns, plus
-the unweighted mean over the selected tasks.
+The internal evaluator reports accuracy, accepted accuracy, coverage, task-macro
+accuracy and task/family/duration breakdowns. Missing or failed predictions count
+as incorrect in the main accuracy. Model inputs and reference answers are separated.
+The full v1.0 question membership and labels remain frozen; annotation changes
+require a new dataset version and evaluation outputs.
 
-### Filters, saved outputs and resuming
+Full data operations are for benchmark operators only, using
+`tools/maintainer_evaluation.py` on controlled infrastructure. That script is a
+workflow distinction, not an access-control boundary: private credentials and
+execution isolation enforce confidentiality. See the [maintainer guide](docs/maintaining.md).
+Do not grant participants storage access as a way to run the benchmark.
 
-Use `--task graph.route_action`, `--task graph.destination_node` or
-`--task conversation.next_speaker`; repeat `--task` to combine tasks. `--limit 5`
-selects the first five eligible rows for a smoke test, not a random benchmark.
-
-Each run writes `run.json`, `predictions.jsonl`, and `report.json` under the chosen
-output directory. Rerun the **same command and output directory** to resume:
-successful predictions are reused, while failed or unattempted rows are retried.
-A different dataset, selection, model, modality or prompt fingerprint requires
-a new output directory. Use a new directory after changing custom model code too.
-For filtered external scoring, pass the same `--task` and `--limit` filters.
-
-See [the protocol](docs/protocol.md) and [dataset format](docs/dataset-format.md).
+See [the protocol](docs/protocol.md) and the [internal dataset format](docs/dataset-format.md).
 
 ## Website
 
@@ -219,5 +184,5 @@ The evaluator and website source are MIT licensed. That software license does
 **not** apply to recordings, transcripts, annotations or the private dataset.
 The six preview recordings are provided for viewing/listening on the project
 page; no general redistribution or training license is granted. Full benchmark
-access requires separate authorization. Do not commit private data or outputs
+data is restricted to operators and controlled workers, not participants. Do not commit private data or outputs
 containing conversation text to a public repository.

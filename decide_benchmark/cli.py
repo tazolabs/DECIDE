@@ -1,4 +1,4 @@
-"""Download, verify, run and score DECIDE without the private annotation app."""
+"""Test a model on the six public DECIDE previews; full evaluation is maintainer-run."""
 from __future__ import annotations
 
 import argparse
@@ -20,17 +20,21 @@ def save_json(path, value):
     path.write_text(json.dumps(value, indent=2, ensure_ascii=False, allow_nan=False) + "\n")
 
 
-def parser():
+def parser(*, maintainer=False):
     p = argparse.ArgumentParser(description=__doc__)
     sub = p.add_subparsers(dest="command", required=True)
-    d = sub.add_parser("download", help="Download the private benchmark after access is granted")
-    d.add_argument("--repo", default=DEFAULT_REPO)
-    d.add_argument("--revision", default=DEFAULT_REVISION)
-    d.add_argument("--output", type=Path, default=ROOT / "data/decide-v1")
-    d.add_argument("--env-file", type=Path, default=ROOT / ".env")
+    if maintainer:
+        d = sub.add_parser("download", help="Maintainers only: fetch private data on controlled evaluation infrastructure")
+        d.add_argument("--repo", default=DEFAULT_REPO)
+        d.add_argument("--revision", default=DEFAULT_REVISION)
+        d.add_argument("--output", type=Path, default=ROOT / "data/decide-v1")
+        d.add_argument("--env-file", type=Path, default=ROOT / ".env")
     for command in ("validate", "run", "score"):
         cmd = sub.add_parser(command)
-        cmd.add_argument("--data", type=Path, help="Local private export or site/preview")
+        if maintainer:
+            cmd.add_argument("--data", type=Path, help="Private export on maintainer-controlled infrastructure")
+        else:
+            cmd.set_defaults(data=None)
         cmd.add_argument("--preview", action="store_true", help="Use only the six public demonstration questions")
         if command in ("run", "score"):
             cmd.add_argument("--task", action="append", help="Exact task ID; repeat for multiple tasks")
@@ -155,9 +159,11 @@ def run(args, dataset, questions):
     return report
 
 
-def main(argv=None):
-    args = parser().parse_args(argv)
+def main(argv=None, *, maintainer=False):
+    args = parser(maintainer=maintainer).parse_args(argv)
     try:
+        if not maintainer and not args.preview:
+            raise ValueError("The public CLI supports only --preview. Full benchmark evaluation is run by maintainers; participants do not download the dataset. See README.md for submission status.")
         if args.command == "download":
             try:
                 from dotenv import load_dotenv

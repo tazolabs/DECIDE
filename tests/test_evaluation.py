@@ -6,6 +6,8 @@ import tempfile
 import unittest
 from unittest.mock import patch
 from types import SimpleNamespace
+from contextlib import redirect_stderr
+from io import StringIO
 
 from decide_benchmark.data import Dataset, ROOT, contained_file
 from decide_benchmark.scoring import score, validate_prediction
@@ -20,6 +22,24 @@ class EvaluationTests(unittest.TestCase):
     def test_preview_audio_and_manifest(self):
         report = self.data.verify()
         self.assertEqual((report["questions"], report["clips"]), (6, 6))
+
+    def test_public_entrypoint_has_no_private_download_or_data_option(self):
+        from decide_benchmark.cli import parser
+        for args in (["download"], ["validate", "--data", "data/decide-v1"]):
+            with self.assertRaises(SystemExit), redirect_stderr(StringIO()):
+                parser().parse_args(args)
+
+    def test_public_entrypoint_cannot_default_to_local_private_data(self):
+        from decide_benchmark.cli import main
+        with patch("decide_benchmark.cli.Dataset") as loader, redirect_stderr(StringIO()):
+            self.assertEqual(main(["validate"]), 1)
+            loader.assert_not_called()
+
+    def test_operator_entrypoint_retains_internal_evaluation(self):
+        from decide_benchmark.cli import parser
+        args = parser(maintainer=True).parse_args(["validate", "--data", "data/decide-v1"])
+        self.assertEqual(args.data, Path("data/decide-v1"))
+        self.assertEqual(parser(maintainer=True).parse_args(["download"]).command, "download")
 
     def test_missing_rows_count_in_denominator(self):
         ref = self.data.references()["example-01"]
