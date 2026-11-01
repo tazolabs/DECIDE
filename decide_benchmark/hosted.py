@@ -56,7 +56,16 @@ def request(service, method, *, body=None, receipt=None):
         response = requests.request(method, service + '/api/evaluations', headers=headers,
                                     params=params, json=body, timeout=(10, 90), allow_redirects=False)
         if not response.ok:
-            raise ValueError(f'Hosted evaluation request returned HTTP {response.status_code}. Check the invitation, approved endpoint and service status.')
+            code = ''
+            try:
+                candidate = response.json().get('error', '')
+                if isinstance(candidate, str) and re.fullmatch(r'[a-z_]{1,80}', candidate):
+                    code = f' ({candidate})'
+            except (ValueError, AttributeError):
+                pass
+            retry = response.headers.get('Retry-After', '')
+            suffix = f' Retry after {retry} seconds using the same receipt.' if retry.isdigit() else ''
+            raise ValueError(f'Hosted evaluation request returned HTTP {response.status_code}{code}.{suffix}')
         payload = response.json()
         if not isinstance(payload, dict):
             raise ValueError('Invalid hosted service response')
@@ -69,7 +78,7 @@ def submit(args):
     from .data import digest
     service = service_url(args.service)
     body = {'endpoint': args.endpoint, 'model': args.model, 'modality': args.modality, 'mode': args.mode,
-            'api_key': secret(args.api_key_env, required=False), 'invitation_token': secret(args.submission_token_env)}
+            'api_key': secret(args.api_key_env, required=False)}
     fingerprint = digest({'service': service, **body})
     if args.receipt.exists():
         receipt = json.loads(args.receipt.read_text())

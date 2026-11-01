@@ -6,6 +6,8 @@ import { authorizeResult, encryptSecret, decryptSecret, endpointDispatcher, erro
 import { addOutcome, aggregateReport, emptyMetrics, validateAnswer } from '../server/metrics.mjs';
 import { predictModel, retryDelay } from '../server/model.mjs';
 import { loadDataset, audioBytes } from '../server/dataset.mjs';
+import { admissionIdentity, admissionLimits } from '../server/admission.mjs';
+import { checkEndpoint } from '../server/preflight.mjs';
 
 process.env.DECIDE_ENCRYPTION_KEY = 'ab'.repeat(32);
 const criteria = { agent: 'Agent speaks', caller: 'Caller speaks' };
@@ -48,10 +50,53 @@ test('encrypted API keys are bound to the job; result authorization is isolated'
 
 test('submissions forbid participant-selected dataset paths and unsafe API keys', () => {
   const body = { endpoint: 'https://example.com/model', model: 'test-model', modality: 'audio',
-    invitation_token: 'x'.repeat(43), idempotency_key: randomUUID() };
+    idempotency_key: randomUUID() };
   assert.equal(validateSubmission(body).mode, 'benchmark');
   for (const change of [{ dataset: 'other' }, { api_key: 'key\r\nInjected: yes' }, { mode: 'custom' },
-    { invitation_token: 'short' }, { modality: 'unknown' }]) assert.throws(() => validateSubmission({ ...body, ...change }));
+    { invitation_token: 'obsolete' }, { idempotency_key: 'guessable-idempotency-key' }, { modality: 'unknown' }]) assert.throws(() => validateSubmission({ ...body, ...change }));
+});
+
+test('automatic admission stores only salted daily network and model-credential hashes', () => {
+  const request = (ip) => new Request('https://example.com', { headers: { 'x-vercel-forwarded-for': ip, 'x-forwarded-for': '1.2.3.4' } });
+  const body = { endpoint: 'https://api.example.com/v1/decisions', api_key: 'test-only-secret' };
+  const day = new Date('2026-11-01T12:00:00Z');
+  const first = admissionIdentity(request('8.8.8.8'), body, day);
+  assert.equal(first.retryAfter, 43200);
+  assert.equal(first.network.length, 64);
+  assert(!JSON.stringify(first).includes('test-only-secret'));
+  assert(!JSON.stringify(first).includes('8.8.8.8'));
+  assert.notEqual(first.network, admissionIdentity(request('8.8.4.4'), body, day).network);
+  assert.notEqual(first.network, admissionIdentity(request('8.8.8.8'), body, new Date('2026-11-02T12:00:00Z')).network);
+  assert.notEqual(first.credential, admissionIdentity(request('8.8.8.8'), { ...body, api_key: 'another-key' }, day).credential);
+  assert.equal(first.credential, admissionIdentity(request('8.8.8.8'), { ...body, endpoint: 'https://api.example.com/another/path' }, day).credential);
+  assert.equal(admissionIdentity(request('2001:4860:1:2::1'), body, day).network,
+    admissionIdentity(request('2001:4860:1:2::ff'), body, day).network);
+  assert.throws(() => admissionIdentity(new Request('https://example.com', { headers: { 'x-forwarded-for': '8.8.8.8' } }), body, day));
+});
+
+test('automatic admission limits have bounded operator-configurable values', () => {
+  assert.equal(admissionLimits({}).network_benchmark, 2);
+  assert.equal(admissionLimits({ DECIDE_LIMIT_GLOBAL_BENCHMARK: '12' }).global_benchmark, 12);
+  for (const value of ['0', '-1', '1.1', 'unlimited', '10001']) assert.throws(() => admissionLimits({ DECIDE_LIMIT_ACTIVE: value }));
+});
+
+test('endpoint preflight uses only public preview inputs in both modalities', async () => {
+  for (const modality of ['audio', 'text']) {
+    const calls = [];
+    await checkEndpoint({ modality, model: 'test' }, 'test-key', 'opaque', {
+      load: async (mode) => { assert.equal(mode, 'preview'); calls.push('public-data'); return { questions: [question] }; },
+      read: async (row, mode) => { assert.equal(mode, 'preview'); assert.equal(row, question); calls.push('public-audio'); return Buffer.from('wav'); },
+      predict: async (job, row, key, audio) => { assert.equal(row, question); assert.equal(key, 'test-key'); assert.equal(Boolean(audio), modality === 'audio'); calls.push('predict'); },
+    });
+    assert.deepEqual(calls, modality === 'audio' ? ['public-data', 'public-audio', 'predict'] : ['public-data', 'predict']);
+  }
+});
+
+test('failed preflight propagates validation failure without accessing private data', async () => {
+  await assert.rejects(checkEndpoint({ modality: 'text' }, '', 'opaque', {
+    load: async (mode) => { assert.equal(mode, 'preview'); return { questions: [question] }; },
+    predict: async () => { throw new Error('invalid response'); },
+  }));
 });
 
 test('provider answer validation checks option IDs, exact probability keys and argmax', () => {

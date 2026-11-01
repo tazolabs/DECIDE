@@ -112,12 +112,11 @@ export async function readLimited(response, limit) {
 
 export function validateSubmission(body) {
   if (!body || typeof body !== 'object' || Array.isArray(body)) throw new PublicError('invalid_submission');
-  const allowed = new Set(['model', 'endpoint', 'modality', 'api_key', 'invitation_token', 'idempotency_key', 'mode']);
+  const allowed = new Set(['model', 'endpoint', 'modality', 'api_key', 'idempotency_key', 'mode']);
   if (Object.keys(body).some((key) => !allowed.has(key))) throw new PublicError('invalid_submission_field');
   if (typeof body.model !== 'string' || !/^[\w .:/@+-]{1,120}$/.test(body.model)) throw new PublicError('invalid_model');
   if (!['audio', 'text'].includes(body.modality)) throw new PublicError('invalid_modality');
-  if (typeof body.invitation_token !== 'string' || !/^[A-Za-z0-9_-]{40,100}$/.test(body.invitation_token)) throw new PublicError('invalid_invitation', 401);
-  if (typeof body.idempotency_key !== 'string' || !/^[\w-]{16,80}$/.test(body.idempotency_key)) throw new PublicError('invalid_idempotency_key');
+  if (typeof body.idempotency_key !== 'string' || !/^[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/i.test(body.idempotency_key)) throw new PublicError('invalid_idempotency_key');
   if (body.api_key !== undefined && (typeof body.api_key !== 'string' || body.api_key.length > 4096 || /[\s\x00-\x1f]/.test(body.api_key))) throw new PublicError('invalid_api_key');
   const mode = body.mode || 'benchmark';
   if (!['benchmark', 'preview'].includes(mode)) throw new PublicError('invalid_mode');
@@ -133,6 +132,8 @@ export function safeResponse(body, status = 200) {
 
 export function errorResponse(error) {
   // Never serialize an upstream error message/body: it can echo a key or private prompt.
-  return safeResponse({ error: error instanceof PublicError ? error.code : 'service_unavailable' },
+  const response = safeResponse({ error: error instanceof PublicError ? error.code : 'service_unavailable' },
     error instanceof PublicError ? error.status : 503);
+  if (error instanceof PublicError && error.retryAfter) response.headers.set('Retry-After', String(Math.ceil(error.retryAfter)));
+  return response;
 }

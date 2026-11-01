@@ -6,7 +6,7 @@ The full dataset lives in the **private** Hugging Face dataset repository
 `tazolabs/DECIDE`. Restrict read access to benchmark operators and controlled
 evaluation workers. Do not grant dataset access to participants, model submitters
 or their inference endpoints as dataset access. The hosted API worker sends
-permitted inference inputs to approved model endpoints. Never make the repository public or place a Hugging
+permitted inference inputs to automatically validated model endpoints. Never make the repository public or place a Hugging
 Face token in the website. The website includes a hosted API submission flow; see
 [the operator deployment guide](hosted-operations.md).
 
