@@ -5,9 +5,10 @@
 The full dataset lives in the **private** Hugging Face dataset repository
 `tazolabs/DECIDE`. Restrict read access to benchmark operators and controlled
 evaluation workers. Do not grant dataset access to participants, model submitters
-or their inference endpoints. Never make the repository public or place a Hugging
-Face token in the website. The current website is static; a public hosted
-submission service has not yet been implemented.
+or their inference endpoints as dataset access. The hosted API worker sends
+permitted inference inputs to approved model endpoints. Never make the repository public or place a Hugging
+Face token in the website. The website includes a hosted API submission flow; see
+[the operator deployment guide](hosted-operations.md).
 
 `evaluation.py` is preview-only. On operator-controlled infrastructure, internal
 evaluation remains available through `tools/maintainer_evaluation.py`:
@@ -52,10 +53,10 @@ isolates input modality.
 
 ## Website
 
-All served files are in `site/`. No build framework or external storage integration
-is needed. Vercel's project `decide-benchmark` is in the Kodimo team and is linked
-to `tazolabs/DECIDE`. The `.vercelignore` file allows only `site/` and `vercel.json`
-into deployment uploads, even if someone downloads private data locally.
+Public assets are in `site/`. Hosted evaluation functions are in `api/` and
+`server/`, backed by Vercel Queues and the isolated Neon evaluation database. Vercel's project `decide-benchmark` is in the Kodimo team and is linked
+to `tazolabs/DECIDE`. The `.vercelignore` file allows the public assets, API/server source and npm manifests
+into deployment uploads. Private local data and credentials remain excluded.
 
 ```bash
 python3 -m http.server 8080 --directory site
@@ -83,6 +84,8 @@ not published by this repository.
 python -m unittest discover -s tests -v
 python evaluation.py validate --preview
 python tools/check_public.py
+npm ci
+npm test
 ```
 
 Browser-check each example's audio and reference disclosure, the citation copy

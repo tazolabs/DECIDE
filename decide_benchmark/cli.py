@@ -1,4 +1,4 @@
-"""Test a model on the six public DECIDE previews; full evaluation is maintainer-run."""
+"""Submit an API for hosted DECIDE evaluation, or test the six public previews locally."""
 from __future__ import annotations
 
 import argparse
@@ -23,6 +23,21 @@ def save_json(path, value):
 def parser(*, maintainer=False):
     p = argparse.ArgumentParser(description=__doc__)
     sub = p.add_subparsers(dest="command", required=True)
+    from .hosted import DEFAULT_SERVICE
+    online = sub.add_parser('submit', help='Submit a model API; data stays on the evaluation service')
+    online.add_argument('--endpoint', required=True)
+    online.add_argument('--model', required=True)
+    online.add_argument('--modality', choices=('audio', 'text'), required=True)
+    online.add_argument('--mode', choices=('benchmark', 'preview'), default='benchmark')
+    online.add_argument('--service', default=DEFAULT_SERVICE)
+    online.add_argument('--submission-token-env', default='DECIDE_SUBMISSION_TOKEN')
+    online.add_argument('--api-key-env', default='MODEL_API_KEY')
+    online.add_argument('--env-file', type=Path, default=ROOT / '.env')
+    online.add_argument('--receipt', type=Path, default=ROOT / 'runs/remote-submission.json')
+    for action in ('status', 'cancel'):
+        online = sub.add_parser(action, help=f'{action.title()} a hosted evaluation using its local receipt')
+        online.add_argument('--receipt', type=Path, required=True)
+        online.add_argument('--wait', action='store_true')
     if maintainer:
         d = sub.add_parser("download", help="Maintainers only: fetch private data on controlled evaluation infrastructure")
         d.add_argument("--repo", default=DEFAULT_REPO)
@@ -162,6 +177,16 @@ def run(args, dataset, questions):
 def main(argv=None, *, maintainer=False):
     args = parser(maintainer=maintainer).parse_args(argv)
     try:
+        if args.command in {'submit', 'status', 'cancel'}:
+            from . import hosted
+            if args.command == 'submit':
+                from dotenv import load_dotenv
+                load_dotenv(args.env_file, override=False)
+                result = hosted.submit(args)
+            else:
+                result = hosted.status(args, cancel=args.command == 'cancel')
+            print(json.dumps(result, indent=2, ensure_ascii=False))
+            return 0
         if not maintainer and not args.preview:
             raise ValueError("The public CLI supports only --preview. Full benchmark evaluation is run by maintainers; participants do not download the dataset. See README.md for submission status.")
         if args.command == "download":

@@ -2,3 +2,9 @@
 !site
 !site/**
 !vercel.json
+!package.json
+!package-lock.json
+!api
+!api/**
+!server
+!server/**
