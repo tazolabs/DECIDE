@@ -21,6 +21,10 @@ def main():
     forbidden = re.compile(r"(^|/)(\.env(?:\..+)?|annotations.*|ground_truth.*|requests\.jsonl|results\.jsonl|.*\.sqlite3?|.*\.csv)$")
     secrets = re.compile(r"(?:hf_[A-Za-z0-9]{25,}|vercel_[A-Za-z0-9]{20,}|postgres(?:ql)?://[^\s]+|eyJ[A-Za-z0-9_-]{20,}\.[A-Za-z0-9_-]{20,}\.[A-Za-z0-9_-]{10,})")
     for name in filter(None, names):
+        if name.startswith(("data/", "private/", "runs/")):
+            raise ValueError(f"Private data/output directory included in public checkout: {name}")
+        if name.endswith(".jsonl") and name not in {"site/preview/questions.jsonl", "site/preview/answers.jsonl"}:
+            raise ValueError(f"Non-preview question, answer or prediction file included: {name}")
         if name != ".env.example" and forbidden.search(name):
             raise ValueError(f"Private-looking file in public checkout: {name}")
         path = ROOT / name
