@@ -27,6 +27,7 @@ def parser():
     d.add_argument("--repo", default=DEFAULT_REPO)
     d.add_argument("--revision", default=DEFAULT_REVISION)
     d.add_argument("--output", type=Path, default=ROOT / "data/decide-v1")
+    d.add_argument("--env-file", type=Path, default=ROOT / ".env")
     for command in ("validate", "run", "score"):
         cmd = sub.add_parser(command)
         cmd.add_argument("--data", type=Path, help="Local private export or site/preview")
@@ -158,6 +159,11 @@ def main(argv=None):
     args = parser().parse_args(argv)
     try:
         if args.command == "download":
+            try:
+                from dotenv import load_dotenv
+                load_dotenv(args.env_file, override=False)
+            except ImportError:
+                pass
             result = download(args.output, args.repo, args.revision)
         else:
             if args.data and args.preview:
