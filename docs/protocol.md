@@ -54,15 +54,18 @@ confidence intervals, resample source-call groups, not independent question rows
 
 ## Hosted evaluation and privacy
 
-Participants submit configuration for an approved external model API. The worker
+Participants submit configuration for a public external model API directly,
+without an invitation, email or manual approval. The worker
 retrieves the pinned private release, sends only the corresponding inference
 request, and accumulates metrics against private references. The API operator
 receives audio or STT text and permitted context. The service therefore keeps the
 dataset files and labels private without claiming to hide inference inputs from
 the model operator.
 
-Invitation tokens are scoped to a specific HTTPS endpoint and bounded run quota.
-The worker blocks private-network destinations and redirects, validates every
+Automatic limits bound runs per submitting network, model API credential and
+service-wide budget. The worker checks full-run API compatibility on a public
+example before loading private inputs. It blocks private-network destinations
+and redirects, validates every
 prediction, and applies bounded retries. Inference is at least once: providers
 should honor the opaque `Idempotency-Key` header when supported. Missing/invalid
 responses count as incorrect; repeated failures can stop a job. Only completed

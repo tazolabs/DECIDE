@@ -61,15 +61,15 @@ context; the private v1.0 bundle preserves the recorded benchmark prompts.
 ### Full benchmark: submit your model API
 
 Use the [hosted evaluation page](https://decide-benchmark.vercel.app/evaluate), or
-submit from this CLI. Request an invitation from
-[support@tazolabs.com](mailto:support@tazolabs.com?subject=DECIDE%20evaluation%20invitation)
-with your model's HTTPS endpoint. Invitations are endpoint-bound, expire, and
-have a run quota. First verify the [model API contract](docs/hosted-api.md).
+submit from this CLI. **No invitation, email, account or manual approval is needed.**
+Provide a public HTTPS endpoint compatible with the [model API contract](docs/hosted-api.md).
+The service validates its address and tests a full-run endpoint on a public
+example before sending any private benchmark inputs.
 
-Set these values in your local `.env` (never commit it):
+Set your model key in your local `.env` (never commit it). Omit it if your endpoint
+does not require authentication:
 
 ```dotenv
-DECIDE_SUBMISSION_TOKEN=your-invitation-token
 MODEL_API_KEY=your-model-api-key
 ```
 
@@ -98,6 +98,11 @@ a duplicate job. Keep receipts private: they grant read/cancel access to results
 ```bash
 python evaluation.py cancel --receipt runs/my-benchmark-receipt.json
 ```
+
+Automatic daily limits apply per submitting network, per model API credential and
+across the service, plus a concurrency cap. HTTP 429 responses include a retry time;
+no maintainer approval is involved. The full-run compatibility check adds one public
+inference request (with bounded retries) before the 4,867 benchmark requests.
 
 The worker retrieves private data, sends permitted model inputs, and scores
 responses against private references. Only aggregate results are returned after
@@ -141,9 +146,9 @@ python evaluation.py run --preview --provider tazo --output runs/tazo-preview
 python evaluation.py run --preview --provider jev --output runs/jev-preview
 ```
 
-The Jev preview uses bundled STT text and does not send audio to Jev. Your own
-API can be used for these **public previews**. It is not a route to hidden full-data
-access. Custom predictors must handle their own rate limits and retries.
+The Jev preview uses bundled STT text and does not send audio to Jev. Local runs
+use the six public examples; use hosted submission for the private benchmark.
+Custom predictors must handle their own rate limits and retries.
 
 To score predictions for the six previews produced elsewhere:
 

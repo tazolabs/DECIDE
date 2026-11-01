@@ -25,10 +25,10 @@ class HostedClientTests(unittest.TestCase):
         def remote(service, method, **kwargs):
             calls.append(kwargs['body'])
             return {'id': 'job-id', 'result_token': 'test-result-token', 'status': 'queued'}
-        with tempfile.TemporaryDirectory() as tmp, patch.dict(os.environ, {'INVITE': 'test-invite', 'KEY': 'Bearer test-key'}):
+        with tempfile.TemporaryDirectory() as tmp, patch.dict(os.environ, {'KEY': 'Bearer test-key'}):
             args = SimpleNamespace(service='https://example.com', endpoint='https://model.example.com/predict',
                                    model='my-model', modality='audio', mode='benchmark', api_key_env='KEY',
-                                   submission_token_env='INVITE', receipt=Path(tmp) / 'receipt.json')
+                                   receipt=Path(tmp) / 'receipt.json')
             with patch.object(hosted, 'request', side_effect=remote):
                 first = hosted.submit(args)
                 hosted.submit(args)
@@ -38,7 +38,7 @@ class HostedClientTests(unittest.TestCase):
                 self.assertNotIn('test-result-token', json.dumps(first))
                 receipt = json.loads(args.receipt.read_text())
                 self.assertEqual(receipt['result_token'], 'test-result-token')
-                self.assertNotIn('test-invite', args.receipt.read_text())
+                self.assertNotIn('invitation_token', calls[0])
                 self.assertNotIn('test-key', args.receipt.read_text())
                 self.assertEqual(args.receipt.stat().st_mode & 0o777, 0o600)
                 args.model = 'different-model'
@@ -46,10 +46,10 @@ class HostedClientTests(unittest.TestCase):
                     hosted.submit(args)
 
     def test_pending_receipt_survives_network_failure(self):
-        with tempfile.TemporaryDirectory() as tmp, patch.dict(os.environ, {'INVITE': 'test-invite'}):
+        with tempfile.TemporaryDirectory() as tmp, patch.dict(os.environ, {}, clear=False):
             args = SimpleNamespace(service='https://example.com', endpoint='https://model.example.com/predict',
                                    model='my-model', modality='text', mode='benchmark', api_key_env='ABSENT_KEY',
-                                   submission_token_env='INVITE', receipt=Path(tmp) / 'receipt.json')
+                                   receipt=Path(tmp) / 'receipt.json')
             with patch.object(hosted, 'request', side_effect=ValueError('network')):
                 with self.assertRaises(ValueError):
                     hosted.submit(args)

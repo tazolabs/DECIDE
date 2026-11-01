@@ -5,6 +5,7 @@ import { loadDataset, audioBytes } from './dataset.mjs';
 import { predictModel } from './model.mjs';
 import { decryptSecret, PublicError } from './security.mjs';
 import { addOutcome, aggregateReport } from './metrics.mjs';
+import { checkEndpoint } from './preflight.mjs';
 
 export const queue = new QueueClient({ region: 'iad1' });
 export const TOPIC = 'decide-evaluations';
@@ -38,9 +39,30 @@ export async function processEvaluation(message, metadata) {
     if (job.not_before && new Date(job.not_before).getTime() > Date.now()) {
       throw new PublicError('evaluation_cooling_down', 503, Math.ceil((new Date(job.not_before).getTime() - Date.now()) / 1000));
     }
+    const key = decryptSecret(job.api_key_ciphertext, id);
+    if (job.mode === 'benchmark' && !job.preflight_passed) {
+      const attempts = await db()`UPDATE decide_jobs SET preflight_attempts=preflight_attempts+1
+        WHERE id=${id}::uuid AND status='running' AND lease_token=${job.lease_token}::uuid RETURNING preflight_attempts`;
+      if (!attempts.length) return;
+      try {
+        const requestId = createHmac('sha256', process.env.DECIDE_ENCRYPTION_KEY).update(`${id}:preflight`).digest('hex');
+        await checkEndpoint(job, key, requestId);
+      } catch (error) {
+        if (error instanceof PublicError && error.retryAfter && attempts[0].preflight_attempts < 4) {
+          const delay = Math.min(300, Math.max(error.retryAfter, 2 ** attempts[0].preflight_attempts));
+          await db()`UPDATE decide_jobs SET not_before=now()+(${delay}*interval '1 second')
+            WHERE id=${id}::uuid AND lease_token=${job.lease_token}::uuid`;
+          throw new PublicError('endpoint_preflight_retry_scheduled', 503, delay);
+        }
+        await failJob(id, error instanceof PublicError ? error.code : 'endpoint_preflight_failed');
+        return;
+      }
+      const ready = await db()`UPDATE decide_jobs SET preflight_passed=true, not_before=NULL, updated_at=now()
+        WHERE id=${id}::uuid AND status='running' AND lease_token=${job.lease_token}::uuid RETURNING id`;
+      if (!ready.length) return;
+    }
     const dataset = await loadDataset(job.mode);
     if (job.total > dataset.questions.length) throw new PublicError('dataset_invalid', 503);
-    const key = decryptSecret(job.api_key_ciphertext, id);
     for (let count = 0; count < 3 && job.cursor < job.total && Date.now() < latestQuestionStart; count++) {
       // Check cancellation before sending each new private input to a provider.
       const active = await db()`SELECT status FROM decide_jobs WHERE id=${id}::uuid AND lease_token=${job.lease_token}::uuid`;
@@ -55,6 +77,8 @@ export async function processEvaluation(message, metadata) {
           WHERE id=${id}::uuid AND lease_token=${job.lease_token}::uuid AND cursor=${job.cursor} RETURNING row_attempts`;
         job.row_attempts = attempt[0]?.row_attempts || 4;
         const audio = job.modality === 'audio' ? await audioBytes(question, job.mode) : null;
+        const continuing = await db()`SELECT status FROM decide_jobs WHERE id=${id}::uuid AND lease_token=${job.lease_token}::uuid`;
+        if (continuing[0]?.status !== 'running') return;
         const requestId = createHmac('sha256', process.env.DECIDE_ENCRYPTION_KEY).update(`${id}:${job.cursor}`).digest('hex');
         choice = await predictModel(job, question, key, audio, requestId);
       } catch (error) {

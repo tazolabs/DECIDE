@@ -8,8 +8,7 @@
   },
   "scripts": {
     "test": "node --test tests/hosted.test.mjs",
-    "db:setup": "node --env-file=.env.hosted.local tools/hosted-admin.mjs setup",
-    "invite": "node --env-file=.env.hosted.local tools/hosted-admin.mjs invite"
+    "db:setup": "node --env-file=.env.hosted.local tools/hosted-admin.mjs setup"
   },
   "dependencies": {
     "@neondatabase/serverless": "1.2.0",

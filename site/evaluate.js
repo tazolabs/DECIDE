@@ -1,6 +1,6 @@
 const $ = (id) => document.getElementById(id);
 const storageKey = 'decide-evaluation-receipt-v1';
-let receipt = null, pending = null, report = null, timer = null, polling = false;
+let receipt = null, pending = null, report = null, timer = null, polling = false, activeJob = false;
 const terminal = new Set(['completed', 'failed', 'cancelled']);
 function remember(value) {
   receipt = value;
@@ -16,18 +16,22 @@ async function api(method, body) {
   const url = '/api/evaluations' + (body ? '' : '?id=' + encodeURIComponent(receipt.id));
   const response = await fetch(url, { method, headers, body: body ? JSON.stringify(body) : undefined, cache: 'no-store', redirect: 'error' });
   const value = await response.json();
-  if (!response.ok) throw new Error(value.error || `Service returned HTTP ${response.status}`);
+  if (!response.ok) throw Object.assign(new Error(value.error || `Service returned HTTP ${response.status}`), {
+    status: response.status, retryAfter: Number(response.headers.get('Retry-After') || 0),
+  });
   return value;
 }
 function render(job) {
+  activeJob = !terminal.has(job.status);
   $('job-panel').hidden = false; $('job-empty').hidden = true;
-  $('job-model').textContent = job.model; $('job-status').textContent = job.status;
+  $('job-model').textContent = job.model; $('job-status').textContent = job.stage === 'validating_endpoint' ? 'Validating endpoint' : job.status;
   $('job-progress').textContent = `${job.progress.completed.toLocaleString()} / ${job.progress.total.toLocaleString()}`;
   $('job-meter').max = job.progress.total; $('job-meter').value = job.progress.completed;
   $('cancel-job').disabled = terminal.has(job.status);
   $('job-message').textContent = job.error ? `Evaluation stopped: ${job.error.replaceAll('_', ' ')}.` :
     job.status === 'completed' ? 'Evaluation complete. Your aggregate results are below.' :
-    job.status === 'cancelled' ? 'Evaluation cancelled. A request already in progress may still finish.' : 'Running in the background. You can leave this page and return later.';
+    job.status === 'cancelled' ? 'Evaluation cancelled. A request already in progress may still finish.' :
+    job.stage === 'validating_endpoint' ? 'Checking your API on a public example before sending private benchmark inputs.' : 'Running in the background. You can leave this page and return later.';
   report = job.report; $('report').hidden = !report;
   if (report) {
     const pct = (v) => v === null ? '—' : `${(v * 100).toFixed(1)}%`;
@@ -46,15 +50,15 @@ function render(job) {
 async function refresh() {
   if (!receipt || polling) return;
   polling = true;
-  try { render(await api('GET')); }
-  catch (error) { $('job-message').textContent = `Could not refresh: ${error.message}. Use Refresh status to retry.`; }
+  try { const id = receipt.id; const job = await api('GET'); if (receipt.id === id) render(job); }
+  catch (error) { $('job-message').textContent = `Could not refresh: ${error.message}. Retrying automatically…`; timer = setTimeout(refresh, 15000); }
   finally { polling = false; }
 }
 $('submission-form').addEventListener('submit', async (event) => {
   event.preventDefault();
-  if (receipt && !$('cancel-job').disabled) { $('submission-message').textContent = 'Finish or cancel the current evaluation before starting another on this device.'; return; }
+  if (activeJob) { $('submission-message').textContent = 'Finish or cancel the current evaluation before starting another on this device.'; return; }
   const body = Object.fromEntries(new FormData(event.target));
-  body.api_key = body.api_key.trim().replace(/^Bearer +/i, ''); body.invitation_token = body.invitation_token.trim();
+  body.api_key = body.api_key.trim().replace(/^Bearer +/i, '');
   const fingerprint = Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(JSON.stringify(body))))).map((n) => n.toString(16).padStart(2, '0')).join('');
   if (!pending || pending.fingerprint !== fingerprint) pending = { fingerprint, key: crypto.randomUUID() };
   body.idempotency_key = pending.key;
@@ -62,10 +66,13 @@ $('submission-form').addEventListener('submit', async (event) => {
   try {
     const job = await api('POST', body);
     remember({ id: job.id, result_token: job.result_token, service: location.origin });
-    pending = null; event.target.elements.api_key.value = ''; event.target.elements.invitation_token.value = '';
+    pending = null; event.target.elements.api_key.value = '';
     $('submission-message').textContent = 'Accepted. Save the private receipt below to keep access to this job.';
     render(job);
-  } catch (error) { $('submission-message').textContent = `Submission failed: ${error.message.replaceAll('_', ' ')}. Retry with the same settings.`; }
+  } catch (error) {
+    const retry = error.retryAfter ? ` Try again after ${new Date(Date.now() + error.retryAfter * 1000).toLocaleString()}.` : ' Retry with the same settings.';
+    $('submission-message').textContent = `Submission failed: ${error.message.replaceAll('_', ' ')}.${retry}`;
+  }
   finally { $('submit-button').disabled = false; }
 });
 $('refresh-job').addEventListener('click', refresh);

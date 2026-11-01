@@ -30,7 +30,6 @@ def parser(*, maintainer=False):
     online.add_argument('--modality', choices=('audio', 'text'), required=True)
     online.add_argument('--mode', choices=('benchmark', 'preview'), default='benchmark')
     online.add_argument('--service', default=DEFAULT_SERVICE)
-    online.add_argument('--submission-token-env', default='DECIDE_SUBMISSION_TOKEN')
     online.add_argument('--api-key-env', default='MODEL_API_KEY')
     online.add_argument('--env-file', type=Path, default=ROOT / '.env')
     online.add_argument('--receipt', type=Path, default=ROOT / 'runs/remote-submission.json')

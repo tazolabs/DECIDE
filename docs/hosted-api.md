@@ -1,9 +1,10 @@
 # Model API contract
 
-The hosted evaluator calls an approved **HTTPS POST endpoint**. Use an adapter
+The hosted evaluator calls your public **HTTPS POST endpoint**. Submission is
+self-service: no invitation, email, account or manual approval is needed. Use an adapter
 endpoint if your provider has a different schema. The endpoint must accept every
 question's supplied option IDs and return one of them without changing the task.
-Invitations are approved for the exact URL. Query-string credentials, redirects,
+The service automatically validates the URL and public DNS addresses. Query-string credentials, redirects,
 IP literals and private-network destinations are not accepted.
 
 ## Requests
@@ -73,6 +74,11 @@ IDs, finite values between 0 and 1 summing to 1 (tolerance 0.001), and `choice`
 must be a maximum-probability option. If `model` is provided it must match the
 requested ID. Responses are limited to 512 KiB and requests time out after 45 s.
 
+Before a full run, the worker sends one public preview question using the chosen
+modality and validates your response. If this fails, the job stops without sending
+private inputs. This check is not included in benchmark scores. Preview runs already
+use public data and do not add a separate preflight request.
+
 Each job sends serial requests with a one-second pause. HTTP 408/429 and selected
 5xx errors receive up to four attempts per question, honoring `Retry-After` up
 to five minutes. Authentication/configuration failures stop the job immediately;
@@ -91,5 +97,19 @@ results. Cells below ten questions are suppressed. Preview results are integrati
 checks, not full-benchmark scores.
 
 Your model endpoint's operator receives and can observe inference inputs. Dataset
-files and reference labels stay on our infrastructure. Ask the maintainers for an
-invitation at support@tazolabs.com before submitting.
+files and reference labels stay on our infrastructure.
+
+## Automatic run limits
+
+Submissions are admitted automatically. Daily limits apply to the submitting
+network and the combination of provider origin and API credential, with global
+daily and concurrent-job caps. Failed and cancelled jobs also consume a run.
+Switching model IDs or endpoint paths does not bypass the credential limit. IPv6
+addresses in one /64 share a network limit. Only daily salted hashes are stored
+for these limits, not raw IP addresses or plaintext keys. Shared office networks
+share a limit; these are resource controls, not verified personal identities.
+
+A limit response is HTTP 429 with `Retry-After`. Daily limits reset at 00:00 UTC;
+capacity limits can be retried sooner. Reuse the original idempotency key/receipt
+when retrying. An already-created identical job is returned even if a quota has
+since been reached. Quotas cannot be raised through submission JSON.
