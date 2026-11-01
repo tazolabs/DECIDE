@@ -1,0 +1,19 @@
+{
+  "name": "DECIDE preview",
+  "version": "1.0-preview",
+  "schema_version": 1,
+  "questions": 6,
+  "clips": 6,
+  "tasks": 6,
+  "source_calls": 6,
+  "files": {
+    "answers.jsonl": "fea09bfa7e1192805896ccd142a75496e22988f8ab704e0a15d6e0f469782fca",
+    "audio/example-01.wav": "e8b730257f57093bd678625c4642ab673e761b6442fef83f21e5bdffe553d2d0",
+    "audio/example-02.wav": "fba9175fe44a34fbcc0539f44aaaf718ac92e7bcd5a7dd5d513ef7a1a4860171",
+    "audio/example-03.wav": "6366af9b30bc189925c82e6bcc0eed3d759e615288e41129344f92395fd395d8",
+    "audio/example-04.wav": "730883ba0f3d89eb50fa19bdac9603b2cdf7b882fd3d90e504f654ecf9b58c05",
+    "audio/example-05.wav": "89c646851084d70937a9d1315ba6c393869ffe3052b19f68dc03ba717cf9ffbf",
+    "audio/example-06.wav": "12edadcf356cfde08da8f11a411ba5f72e0dd754911d930e4108d52f79d1534c",
+    "questions.jsonl": "1592153eaeaf0628397ab61e6d8c8ab32a9b95e01a266767bcb04b9ec327a20d"
+  }
+}
