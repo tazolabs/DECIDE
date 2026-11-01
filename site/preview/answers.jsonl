@@ -1,0 +1,6 @@
+{"id": "example-01", "label": "interested", "accepted_labels": ["interested"]}
+{"id": "example-02", "label": "advance", "accepted_labels": ["advance"]}
+{"id": "example-03", "label": "send_material", "accepted_labels": ["send_material"]}
+{"id": "example-04", "label": "caller", "accepted_labels": ["caller"]}
+{"id": "example-05", "label": "satisfied_or_pleased", "accepted_labels": ["satisfied_or_pleased"]}
+{"id": "example-06", "label": "switch_detected", "accepted_labels": ["switch_detected"]}
