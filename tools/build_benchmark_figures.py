@@ -7,6 +7,7 @@ Text is outlined using the bundled OFL fonts, so GitHub and browsers render it a
 from pathlib import Path
 from html import escape
 import math
+import re
 from fontTools.ttLib import TTFont
 from fontTools.pens.svgPathPen import SVGPathPen
 from fontTools.pens.transformPen import TransformPen
@@ -203,7 +204,22 @@ def ridge():
     f.save('ridge.svg')
 
 
+def dark_variants():
+    # Explicit Lagoon dark colors preserve the figures' intended semantics;
+    # the light SVGs embedded in the GitHub README remain unchanged.
+    palette = {
+        PAPER: '#061214', INK: '#e6f2f1', TEAL: '#19c2ad', STRONG: '#6bd6c6',
+        MUTED: '#a4b5b5', LINE: '#24383a', SOFT: '#142427',
+        '#95a7a7': '#45625f', '#cbd6d6': '#263f3d',
+    }
+    for name in ('benchmark-overview', 'benchmark-overview-mobile',
+                 'decision-families', 'decision-families-mobile', 'ridge'):
+        svg = (OUT / f'{name}.svg').read_text()
+        svg = re.sub(r'#[0-9a-fA-F]{6}\b', lambda m: palette.get(m[0].lower(), m[0]), svg)
+        (OUT / f'{name}-dark.svg').write_text(svg)
+
+
 if __name__=='__main__':
     OUT.mkdir(parents=True,exist_ok=True)
-    overview();overview(True);distribution();distribution(True);ridge()
-    print('Built five SVG assets from public aggregate counts and the brand fonts.')
+    overview();overview(True);distribution();distribution(True);ridge();dark_variants()
+    print('Built five light and five dark SVG assets from public aggregate counts and the brand fonts.')
