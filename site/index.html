@@ -4,7 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="DECIDE evaluates decisions in real voice-agent calls: business intent, graph routing, tools, turn taking, emotion and language. Explore six audio examples and the evaluation toolkit.">
-  <meta name="theme-color" content="#00897b">
+  <meta name="theme-color" content="#f6f9f9">
+  <meta name="color-scheme" content="light dark">
   <meta property="og:title" content="DECIDE · A benchmark for voice-agent decisions">
   <meta property="og:description" content="4,867 decision questions. 1,081 production-call clips. 32 tasks. A benchmark for deciding what happens next in a voice conversation.">
   <meta property="og:type" content="website">
@@ -12,27 +13,32 @@
   <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
   <link rel="preload" href="/assets/fonts/hanken-grotesk-latin.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="/assets/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <script src="/theme.js"></script>
   <link rel="stylesheet" href="/style.css">
   <script src="/app.js" defer></script>
 </head>
 <body>
   <a class="skip" href="#main">Skip to content</a>
   <header class="topbar">
-    <a class="wordmark" href="#" aria-label="DECIDE home"><img src="/assets/brand/tazo-mark-teal.svg" width="26" height="26" alt="">DECIDE</a>
+    <a class="wordmark" href="https://tazolabs.com/" aria-label="Tazo Labs homepage"><span class="tazo-symbol" aria-hidden="true"></span><span>tazo<span class="wordmark-sub">/labs</span></span></a>
+    <div class="header-actions">
     <nav aria-label="Main navigation">
       <a href="#overview">Overview</a><a href="#tasks">Tasks</a><a href="#examples">Examples</a><a href="#evaluation">Evaluation</a>
       <a href="https://github.com/tazolabs/DECIDE">GitHub <span aria-hidden="true">↗</span></a><a class="nav-evaluate" href="/evaluate">Evaluate <span aria-hidden="true">↗</span></a>
     </nav>
+    <button class="theme-toggle" data-theme-toggle type="button" aria-label="Switch to dark mode" hidden><svg class="theme-light" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.9 13A9 9 0 0 1 11 3.1 9 9 0 1 0 20.9 13Z"/></svg><svg class="theme-dark" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"/></svg></button>
+    </div>
   </header>
   <main id="main">
     <section class="hero" aria-labelledby="title">
-      <img class="hero-ridge" src="/assets/figures/ridge.svg" width="1280" height="165" alt="" aria-hidden="true">
+      <img class="hero-ridge theme-light" src="/assets/figures/ridge.svg" width="1280" height="165" alt="" aria-hidden="true">
+      <img class="hero-ridge theme-dark" src="/assets/figures/ridge-dark.svg" width="1280" height="165" alt="" aria-hidden="true">
       <p class="eyebrow">A benchmark for voice-agent decisions</p>
       <h1 id="title">DECIDE</h1>
       <p class="expansion"><strong>D</strong>ecision <strong>E</strong>valuation in <strong>C</strong>alls:<br class="mobile-break"> <strong>I</strong>ntent, <strong>D</strong>ialogue and <strong>E</strong>motion</p>
       <p class="hero-copy">From hearing a conversation to deciding what happens next.</p>
       <p class="authors">Harsh Pare · Naman Jain · Sachin Kumar Singh · Jayakrishna Sahit<br> Siddharth Batra · Sanket Bhat · Surya Vamsee Ayyagari</p>
-      <div class="institutions"><a class="tazo-lockup" href="https://tazolabs.com/" aria-label="Tazo Labs"><img src="/assets/brand/tazo-mark-ink.svg" width="23" height="23" alt="">tazo<span>/labs</span></a><span class="affiliation-dot" aria-hidden="true">·</span><span>Call data from <a href="https://www.bolna.ai/">Bolna</a></span></div>
+      <div class="institutions"><a class="tazo-lockup" href="https://tazolabs.com/" aria-label="Tazo Labs"><span class="tazo-symbol" aria-hidden="true"></span>tazo<span>/labs</span></a><span class="affiliation-dot" aria-hidden="true">·</span><span class="data-source">Call data from <a class="bolna-lockup" href="https://www.bolna.ai/" aria-label="Bolna homepage"><img src="/assets/brand/bolna-logo.png" width="439" height="277" alt="Bolna"></a></span></div>
       <div class="resource-links">
         <a class="button primary" href="/evaluate">Evaluate a model <span class="arrow-tile" aria-hidden="true">↗</span></a>
         <a class="button" href="https://github.com/tazolabs/DECIDE"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5 2 12l6 7m8-14 6 7-6 7M14 3l-4 18"/></svg> Code</a>
@@ -48,16 +54,18 @@
       <p>A caller says “hello?” Is it a greeting, a request to repeat, or an interruption? The words alone may leave the decision unresolved. Voice agents need to combine what was said with how it sounded and what happened earlier in the call.</p>
       <p>DECIDE evaluates these local decisions using short clips from real production conversations supplied by Bolna. Each question pairs an audio clip with permitted context and a set of candidate decisions. The task is to choose the decision supported at the end of the clip.</p>
       <figure class="figure figure-overview">
-        <picture><source media="(max-width: 640px)" srcset="/assets/figures/benchmark-overview-mobile.svg"><img src="/assets/figures/benchmark-overview.svg" width="1280" height="622" loading="lazy" alt="DECIDE overview: clips from Bolna calls, permitted earlier context and candidate decisions lead to one decision at the clip boundary, across six decision families."></picture>
-        <figcaption><strong>Figure 1.</strong> From real calls to local decisions. Each question combines a fixed audio boundary, permitted context and candidate options. The waveforms are schematic; real clips are available in the six examples below. <a class="figure-link" href="/assets/figures/benchmark-overview.svg">Open figure ↗</a></figcaption>
+        <picture class="theme-light"><source media="(max-width: 640px)" srcset="/assets/figures/benchmark-overview-mobile.svg"><img src="/assets/figures/benchmark-overview.svg" width="1280" height="622" loading="lazy" alt="DECIDE overview: clips from Bolna calls, permitted earlier context and candidate decisions lead to one decision at the clip boundary, across six decision families."></picture>
+        <picture class="theme-dark"><source media="(max-width: 640px)" srcset="/assets/figures/benchmark-overview-mobile-dark.svg"><img src="/assets/figures/benchmark-overview-dark.svg" width="1280" height="622" loading="lazy" alt="DECIDE overview: clips from Bolna calls, permitted earlier context and candidate decisions lead to one decision at the clip boundary, across six decision families."></picture>
+        <figcaption><strong>Figure 1.</strong> From real calls to local decisions. Each question combines a fixed audio boundary, permitted context and candidate options. The waveforms are schematic; real clips are available in the six examples below. <a class="figure-link theme-light" href="/assets/figures/benchmark-overview.svg">Open figure ↗</a><a class="figure-link theme-dark" href="/assets/figures/benchmark-overview-dark.svg">Open figure ↗</a></figcaption>
       </figure>
       <p class="small">The benchmark covers 570 source calls and 34 agents, predominantly in college admissions, with English and Hindi speech. A clip can support multiple questions. Reference decisions were manually annotated by a team of four.</p>
     </section>
     <section id="tasks" class="section" aria-labelledby="tasks-title">
       <p class="section-label">02 / Tasks</p><h2 id="tasks-title">Decisions across the voice-agent stack.</h2>
       <figure class="figure figure-chart">
-        <picture><source media="(max-width: 640px)" srcset="/assets/figures/decision-families-mobile.svg"><img src="/assets/figures/decision-families.svg" width="1280" height="690" loading="lazy" alt="Question counts by family: business and conversation 1,403; graph routing 743; tool decisions 128; turn taking 376; voice properties 1,886; language switching 331. Total: 4,867."></picture>
-        <figcaption><strong>Figure 2.</strong> Question distribution across the six decision families in DECIDE v1.0. A single audio clip can support more than one question. <a class="figure-link" href="/assets/figures/decision-families.svg">Open figure ↗</a></figcaption>
+        <picture class="theme-light"><source media="(max-width: 640px)" srcset="/assets/figures/decision-families-mobile.svg"><img src="/assets/figures/decision-families.svg" width="1280" height="690" loading="lazy" alt="Question counts by family: business and conversation 1,403; graph routing 743; tool decisions 128; turn taking 376; voice properties 1,886; language switching 331. Total: 4,867."></picture>
+        <picture class="theme-dark"><source media="(max-width: 640px)" srcset="/assets/figures/decision-families-mobile-dark.svg"><img src="/assets/figures/decision-families-dark.svg" width="1280" height="690" loading="lazy" alt="Question counts by family: business and conversation 1,403; graph routing 743; tool decisions 128; turn taking 376; voice properties 1,886; language switching 331. Total: 4,867."></picture>
+        <figcaption><strong>Figure 2.</strong> Question distribution across the six decision families in DECIDE v1.0. A single audio clip can support more than one question. <a class="figure-link theme-light" href="/assets/figures/decision-families.svg">Open figure ↗</a><a class="figure-link theme-dark" href="/assets/figures/decision-families-dark.svg">Open figure ↗</a></figcaption>
       </figure>
       <details class="chart-data"><summary>Task descriptions and accessible chart data</summary>
       <div class="table-scroll"><table class="task-table"><caption class="sr-only">Six decision families and representative questions</caption><thead><tr><th scope="col">Decision family</th><th scope="col">What the model decides</th><th scope="col">Questions</th></tr></thead><tbody>
