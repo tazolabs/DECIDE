@@ -1,6 +1,6 @@
 {
   "name": "DECIDE preview",
-  "version": "1.0-preview",
+  "version": "1.0-preview-redacted-1",
   "schema_version": 1,
   "questions": 6,
   "clips": 6,
@@ -8,12 +8,14 @@
   "source_calls": 6,
   "files": {
     "answers.jsonl": "fea09bfa7e1192805896ccd142a75496e22988f8ab704e0a15d6e0f469782fca",
-    "audio/example-01.wav": "e8b730257f57093bd678625c4642ab673e761b6442fef83f21e5bdffe553d2d0",
-    "audio/example-02.wav": "fba9175fe44a34fbcc0539f44aaaf718ac92e7bcd5a7dd5d513ef7a1a4860171",
-    "audio/example-03.wav": "6366af9b30bc189925c82e6bcc0eed3d759e615288e41129344f92395fd395d8",
+    "audio/example-01.wav": "8184aee34af5ab5aa6b98c1f708760d3192bab6f13bed6ddcef40aa7210610d5",
+    "audio/example-02.wav": "4df1c8f49a7f83a310640ba0325cea9d25cbddbf1021893f0e9bf850b9e04142",
+    "audio/example-03.wav": "dd2bbc93efabbf5413d77d6e6b58da2ce852764c42bfbc02ceb6342e850e41ad",
     "audio/example-04.wav": "730883ba0f3d89eb50fa19bdac9603b2cdf7b882fd3d90e504f654ecf9b58c05",
-    "audio/example-05.wav": "89c646851084d70937a9d1315ba6c393869ffe3052b19f68dc03ba717cf9ffbf",
+    "audio/example-05.wav": "b9a08809dd6819af7fc55a1a723b04174c32750f9195ea320d2d48a3ae0fd2da",
     "audio/example-06.wav": "12edadcf356cfde08da8f11a411ba5f72e0dd754911d930e4108d52f79d1534c",
-    "questions.jsonl": "1592153eaeaf0628397ab61e6d8c8ab32a9b95e01a266767bcb04b9ec327a20d"
-  }
+    "questions.jsonl": "a371761972464cad7a0ef7645756be5af5478d9e10c08c8f2c04f955226c4ebb",
+    "redactions.json": "90d3c50eb6e95ff49578566cc77a2b4782643fbffa95f8cc1c9cd64fa4ce039e"
+  },
+  "audio_redaction": "redactions.json"
 }

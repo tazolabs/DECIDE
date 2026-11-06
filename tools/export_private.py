@@ -59,6 +59,8 @@ def main():
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--write-previews", action="store_true", help="Explicitly publish the six allowlisted examples to site/preview")
     args = parser.parse_args()
+    if args.write_previews and (PUBLIC_ROOT / "site/preview/redactions.json").exists():
+        parser.error("Public previews have privacy redactions; raw export must not overwrite them")
     root, out = args.source.resolve(), args.output.resolve()
     if out == PUBLIC_ROOT or PUBLIC_ROOT in out.parents:
         parser.error("The full export must be outside the public repository")
