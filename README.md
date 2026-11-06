@@ -2,7 +2,8 @@
 
 **Decision Evaluation in Calls: Intent, Dialogue and Emotion**
 
-A benchmark for the local decisions a voice agent makes during a conversation:
+DECIDE is a joint benchmark from [Tazo Labs](https://tazolabs.com/) and
+[Bolna](https://www.bolna.ai/) for the local decisions a voice agent makes during a conversation:
 understanding caller intent, choosing graph routes and external tools, allocating
 the next turn, and interpreting emotion, speakers, disturbance and language changes.
 
@@ -11,8 +12,8 @@ the next turn, and interpreting emotion, speakers, disturbance and language chan
 [Evaluate a model](https://decide-benchmark.vercel.app/evaluate)
 
 DECIDE v1.0 contains **4,867 decision questions over 1,081 audio clips and 32 tasks**.
-Clips are 3–25 seconds long and come from 570 production calls across 34 agents,
-supplied by [Bolna](https://www.bolna.ai/). The benchmark predominantly covers
+Clips are 3–25 seconds long and come from 570 production calls across 34 agents.
+The benchmark predominantly covers
 college-admissions conversations in English and Hindi. A clip can support multiple
 decision questions. The human annotation team comprised four annotators.
 

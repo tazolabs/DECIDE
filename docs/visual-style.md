@@ -17,6 +17,10 @@ uses a CSS mask so it follows the active brand color. The partner logo is the
 original transparent Bolna PNG provided for the project, preserved without
 recoloring or adding a background.
 
+DECIDE is presented as a joint benchmark from Tazo Labs and Bolna. The hero pairs
+both logos under “Developed in partnership”; recordings are described generically
+as real production conversations between agents and callers.
+
 Hanken Grotesk is the display face, Inter the body face, and IBM Plex Mono the
 technical label/code face. Latin WOFF2 files are self-hosted in `site/assets/fonts/`;
 no external font service runs in the browser. They come from Fontsource 5.3.0;
