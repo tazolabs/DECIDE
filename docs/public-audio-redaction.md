@@ -26,6 +26,20 @@ text uses redaction placeholders. Privacy beeps are synthetic; they should not
 be counted as original call disturbance or additional speakers. Reference
 decision labels remain unchanged.
 
+## Public transcript locations
+
+The website player displays the question and context, not a transcript. However,
+the public download at `/preview/questions.jsonl` includes transcript text in
+`text_request.state.clip_transcript.text` and its `segments[].text` entries.
+Both representations use `[REDACTED_CLIENT]` in place of the identified names.
+
+The Hugging Face sample parquet contains twenty questions and six embedded audio
+clips, with question, context, option and label fields. It does not contain a
+verbatim transcript column. Its text fields and dataset card must still be
+checked for identifiers whenever the public samples change. The website note
+beside the audio examples explains that identified PII is masked for legal and
+privacy reasons.
+
 ## Maintainer tools
 
 - `tools/redact_public_audio.py` accepts original audio from an external private
