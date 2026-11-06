@@ -1,0 +1,74 @@
+{
+  "schema_version": 1,
+  "version": "public-audio-redaction-1",
+  "method": "replace_pcm_samples",
+  "tone": {
+    "tone_hz": 1000,
+    "amplitude": 0.12,
+    "fade_ms": 5
+  },
+  "timing_method": "Word timestamps cross-checked against independent ASR; boundaries include conservative padding.",
+  "notice": "Client organization names are replaced with privacy beeps. Ignore these synthetic beeps when judging original call disturbance or speaker count.",
+  "clips": [
+    {
+      "id": "example-01",
+      "source_audio_sha256": "e8b730257f57093bd678625c4642ab673e761b6442fef83f21e5bdffe553d2d0",
+      "spans": [
+        {
+          "start_seconds": 2.66,
+          "end_seconds": 4.3,
+          "category": "client_organization"
+        }
+      ],
+      "audio_sha256": "8184aee34af5ab5aa6b98c1f708760d3192bab6f13bed6ddcef40aa7210610d5"
+    },
+    {
+      "id": "example-02",
+      "source_audio_sha256": "fba9175fe44a34fbcc0539f44aaaf718ac92e7bcd5a7dd5d513ef7a1a4860171",
+      "spans": [
+        {
+          "start_seconds": 0.6,
+          "end_seconds": 1.8,
+          "category": "client_organization"
+        }
+      ],
+      "audio_sha256": "4df1c8f49a7f83a310640ba0325cea9d25cbddbf1021893f0e9bf850b9e04142"
+    },
+    {
+      "id": "example-03",
+      "source_audio_sha256": "6366af9b30bc189925c82e6bcc0eed3d759e615288e41129344f92395fd395d8",
+      "spans": [
+        {
+          "start_seconds": 3.24,
+          "end_seconds": 4.92,
+          "category": "client_organization"
+        }
+      ],
+      "audio_sha256": "dd2bbc93efabbf5413d77d6e6b58da2ce852764c42bfbc02ceb6342e850e41ad"
+    },
+    {
+      "id": "example-04",
+      "source_audio_sha256": "730883ba0f3d89eb50fa19bdac9603b2cdf7b882fd3d90e504f654ecf9b58c05",
+      "spans": [],
+      "audio_sha256": "730883ba0f3d89eb50fa19bdac9603b2cdf7b882fd3d90e504f654ecf9b58c05"
+    },
+    {
+      "id": "example-05",
+      "source_audio_sha256": "89c646851084d70937a9d1315ba6c393869ffe3052b19f68dc03ba717cf9ffbf",
+      "spans": [
+        {
+          "start_seconds": 0.22,
+          "end_seconds": 1.48,
+          "category": "client_organization"
+        }
+      ],
+      "audio_sha256": "b9a08809dd6819af7fc55a1a723b04174c32750f9195ea320d2d48a3ae0fd2da"
+    },
+    {
+      "id": "example-06",
+      "source_audio_sha256": "12edadcf356cfde08da8f11a411ba5f72e0dd754911d930e4108d52f79d1534c",
+      "spans": [],
+      "audio_sha256": "12edadcf356cfde08da8f11a411ba5f72e0dd754911d930e4108d52f79d1534c"
+    }
+  ]
+}
