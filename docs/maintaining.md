@@ -27,6 +27,12 @@ The public release exposes six explicitly selected preview questions and clips.
 Do not copy the original call corpus, app backups or evaluation run directories
 into this repository. Code licensing does not cover audio/data rights.
 
+The separate Hugging Face sample contains twenty reviewed questions over twenty
+distinct privacy-masked clips, spanning eighteen task types. It is a curated
+demonstration, not a representative evaluation split. Its private review plan,
+raw audio and audit transcripts stay outside this public checkout. See the
+[public-audio redaction workflow](public-audio-redaction.md) before refreshing it.
+
 ## Dataset updates
 
 The v1.0 release freezes the paper's final question membership and labels.

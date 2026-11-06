@@ -22,6 +22,10 @@ contains the integration toolkit, website, and exactly six preview examples.
 Full recordings, transcripts, contexts and reference labels remain in private
 maintainer-controlled storage. Participants must not be granted dataset access.
 
+A separate [20-question Hugging Face sample](https://huggingface.co/datasets/tazolabs/DECIDE-samples)
+contains 20 varied, privacy-masked clips across all six decision families. It is
+a demonstration set, distinct from this repository's six integration examples.
+
 ![DECIDE overview: real call clips and permitted context support six families of local decisions.](site/assets/figures/benchmark-overview.svg)
 
 *Short clips from production calls, permitted context and candidate decisions form a local decision task. Waveforms in this overview are schematic.*
