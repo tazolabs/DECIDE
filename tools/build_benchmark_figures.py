@@ -95,7 +95,7 @@ faces = {
 
 
 def overview(mobile=False):
-    desc = ('Schematic of DECIDE: short clips from Bolna production calls, permitted earlier context and candidate decisions yield one decision at the clip boundary. '
+    desc = ('Schematic of DECIDE: short clips from production calls, permitted earlier context and candidate decisions yield one decision at the clip boundary. '
             'Six families cover business and conversation, graph routing, tool decisions, turn taking, voice properties and language switching. '
             'Waveforms are illustrative. The benchmark has 1081 clips from 570 calls, 32 tasks and an annotation team of four.')
     f = Figure(640 if mobile else 1280, 1240 if mobile else 622, 'DECIDE benchmark overview', desc)
@@ -104,7 +104,7 @@ def overview(mobile=False):
         f.text(32, 98, 'Many decisions.', 36, 'display', MUTED)
         f.line(32, 130, 608, 130)
         f.text(32, 170, '01 / REAL CALLS', 17, 'mono', MUTED)
-        f.text(32, 214, 'Bolna production conversations', 28, 'display')
+        f.text(32, 214, 'Real production conversations', 28, 'display')
         f.wave(48, 288, 544, 90)
         f.line(48, 238, 48, 338); f.line(592, 238, 592, 338)
         f.text(32, 378, '3–25 second clips. Exact audio boundaries.', 21)
@@ -131,7 +131,7 @@ def overview(mobile=False):
         f.line(40, 130, 1240, 130)
         f.line(427, 163, 427, 550); f.line(836, 163, 836, 550)
         for x, label in [(40,'01 / REAL CALLS'),(466,'02 / CLIP + CONTEXT'),(876,'03 / DECISION TASKS')]: f.text(x,171,label,12,'mono',MUTED)
-        f.text(40, 211, 'Bolna production calls', 26, 'display')
+        f.text(40, 211, 'Real production calls', 26, 'display')
         f.text(40, 245, 'A short slice of a real conversation.', 16, color=MUTED)
         f.wave(60, 319, 320, 95)
         f.line(60, 265, 60, 369); f.line(380, 265, 380, 369)
