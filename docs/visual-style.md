@@ -6,7 +6,7 @@ and teal `#19C2AD`. Grays, rules and surface tints derive from these colors.
 Thin rules, ridge waveforms and restrained decision highlights carry the brand
 into an academic benchmark page.
 
-The header toggle works on the benchmark and evaluation pages. On the first
+The header toggle works on the benchmark, leaderboard and evaluation pages. On the first
 visit, the theme follows the system preference. An explicit choice is stored
 under `decide-theme` in local storage and shared across pages and browser tabs.
 `site/theme.js` applies it before styles load to avoid a flash of the wrong theme;
@@ -21,6 +21,16 @@ DECIDE is presented as a joint benchmark from Tazo Labs and Bolna. The hero pair
 both logos under “Developed in partnership”; recordings are described generically
 as real production conversations between agents and callers.
 
+The page uses the available viewport width with responsive side padding. The
+decorative hero ridge extends to both screen edges, and the five resource
+buttons share equal columns on desktop. On narrow screens, those buttons form
+two columns with the examples link spanning the final row. The evaluation
+section uses two equal columns with matching heading and link baselines.
+
+`site/leaderboard.html` shares the benchmark hero, partner logos and theme.
+It displays a results-coming-soon message until scores are ready. Navigation
+links back to the benchmark's sections and highlights the current page.
+
 Hanken Grotesk is the display face, Inter the body face, and IBM Plex Mono the
 technical label/code face. Latin WOFF2 files are self-hosted in `site/assets/fonts/`;
 no external font service runs in the browser. They come from Fontsource 5.3.0;
@@ -34,7 +44,7 @@ copied from the supplied Tazo brand kit.
 - `*-mobile.svg`: stacked layouts used by the website below 640px.
 - `ridge.svg`: decorative ridge artwork, not an acoustic measurement.
 - `*-dark.svg`: dark-palette versions of all five figures, selected by the website
-  theme, including the mobile layouts and direct figure links.
+  theme, including the mobile layouts.
 
 All figures are under `site/assets/figures/`. The README embeds the same desktop
 SVGs, so a regenerated figure updates both surfaces. Text is converted to vector

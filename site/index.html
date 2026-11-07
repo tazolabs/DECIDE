@@ -23,7 +23,7 @@
     <a class="wordmark" href="https://tazolabs.com/" aria-label="Tazo Labs homepage"><span class="tazo-symbol" aria-hidden="true"></span><span>tazo<span class="wordmark-sub">/labs</span></span></a>
     <div class="header-actions">
     <nav aria-label="Main navigation">
-      <a href="#overview">Overview</a><a href="#tasks">Tasks</a><a href="#examples">Examples</a><a href="#evaluation">Evaluation</a><a href="#faq">FAQ</a>
+      <a href="#overview">Overview</a><a href="#tasks">Tasks</a><a href="#examples">Examples</a><a href="#evaluation">Evaluation</a><a href="/leaderboard">Leaderboard</a><a href="#faq">FAQ</a>
       <a href="https://github.com/tazolabs/DECIDE">GitHub <span aria-hidden="true">↗</span></a><a class="nav-evaluate" href="/evaluate">Evaluate <span aria-hidden="true">↗</span></a>
     </nav>
     <button class="theme-toggle" data-theme-toggle type="button" aria-label="Switch to dark mode" hidden><svg class="theme-light" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.9 13A9 9 0 0 1 11 3.1 9 9 0 1 0 20.9 13Z"/></svg><svg class="theme-dark" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"/></svg></button>
@@ -41,6 +41,7 @@
       <div class="institutions" aria-label="A partnership between Tazo Labs and Bolna"><a class="tazo-lockup" href="https://tazolabs.com/" aria-label="Tazo Labs"><span class="tazo-symbol" aria-hidden="true"></span>tazo<span>/labs</span></a><span class="affiliation-dot" aria-hidden="true">×</span><a class="bolna-lockup" href="https://www.bolna.ai/" aria-label="Bolna homepage"><img src="/assets/brand/bolna-logo.png" width="439" height="277" alt="Bolna"></a></div>
       <div class="resource-links">
         <a class="button primary" href="/evaluate">Evaluate a model <span class="arrow-tile" aria-hidden="true">↗</span></a>
+        <a class="button" href="/leaderboard"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 21h18M5 21V11h4v10m2 0V4h4v17m2 0v-6h4v6"/></svg> Leaderboard</a>
         <a class="button" href="https://github.com/tazolabs/DECIDE"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5 2 12l6 7m8-14 6 7-6 7M14 3l-4 18"/></svg> Code</a>
         <span class="button pending" aria-disabled="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2H5v20h14V7Zm0 0v6h5M8 12h8m-8 4h8"/></svg> Paper <small>Coming soon</small></span>
         <a class="button" href="#examples"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 14v-3a8 8 0 0 1 16 0v3M4 12H2v8h5v-8Zm16 0h2v8h-5v-8Z"/></svg> Listen to examples</a>
@@ -50,21 +51,18 @@
       <div><dt>4,867</dt><dd>decision questions</dd></div><div><dt>1,081</dt><dd>audio clips</dd></div><div><dt>32</dt><dd>decision tasks</dd></div><div><dt>3–25<span>s</span></dt><dd>clip duration</dd></div>
     </dl>
     <section id="overview" class="section" aria-labelledby="overview-title">
-      <p class="section-label">01 / Overview</p><h2 id="overview-title">What should a voice agent do next?</h2>
-      <p>A caller says “hello?” Is it a greeting, a request to repeat, or an interruption? The words alone may leave the decision unresolved. Voice agents need to combine what was said with how it sounded and what happened earlier in the call.</p>
-      <p>DECIDE evaluates these local decisions using short clips from real production conversations between agents and callers. Each question pairs an audio clip with permitted context and a set of candidate decisions. The task is to choose the decision supported at the end of the clip.</p>
+      <p class="section-label">01 / Overview</p><h2 id="overview-title">Evaluating decisions in real conversations.</h2>
+      <p>DECIDE tests a model’s ability to make decisions during real voice-agent calls. Each question combines a short audio clip with relevant conversation history and a set of candidate answers, covering business intent, graph routing, tool use, turn taking, emotion and language.</p>
       <figure class="figure figure-overview">
         <picture class="theme-light"><source media="(max-width: 640px)" srcset="/assets/figures/benchmark-overview-mobile.svg"><img src="/assets/figures/benchmark-overview.svg" width="1280" height="622" loading="lazy" alt="DECIDE overview: clips from production calls, permitted earlier context and candidate decisions lead to one decision at the clip boundary, across six decision families."></picture>
         <picture class="theme-dark"><source media="(max-width: 640px)" srcset="/assets/figures/benchmark-overview-mobile-dark.svg"><img src="/assets/figures/benchmark-overview-dark.svg" width="1280" height="622" loading="lazy" alt="DECIDE overview: clips from production calls, permitted earlier context and candidate decisions lead to one decision at the clip boundary, across six decision families."></picture>
-        <figcaption><strong>Figure 1.</strong> From real calls to local decisions. Each question combines a fixed audio boundary, permitted context and candidate options. The waveforms are schematic; real clips are available in the six examples below. <a class="figure-link theme-light" href="/assets/figures/benchmark-overview.svg">Open figure ↗</a><a class="figure-link theme-dark" href="/assets/figures/benchmark-overview-dark.svg">Open figure ↗</a></figcaption>
       </figure>
     </section>
     <section id="tasks" class="section" aria-labelledby="tasks-title">
       <p class="section-label">02 / Tasks</p><h2 id="tasks-title">Decisions across the voice-agent stack.</h2>
       <figure class="figure figure-chart">
-        <picture class="theme-light"><source media="(max-width: 640px)" srcset="/assets/figures/decision-families-mobile.svg"><img src="/assets/figures/decision-families.svg" width="1280" height="690" loading="lazy" alt="Question counts by family: business and conversation 1,403; graph routing 743; tool decisions 128; turn taking 376; voice properties 1,886; language switching 331. Total: 4,867."></picture>
-        <picture class="theme-dark"><source media="(max-width: 640px)" srcset="/assets/figures/decision-families-mobile-dark.svg"><img src="/assets/figures/decision-families-dark.svg" width="1280" height="690" loading="lazy" alt="Question counts by family: business and conversation 1,403; graph routing 743; tool decisions 128; turn taking 376; voice properties 1,886; language switching 331. Total: 4,867."></picture>
-        <figcaption><strong>Figure 2.</strong> Question distribution across the six decision families in DECIDE v1.0. A single audio clip can support more than one question. <a class="figure-link theme-light" href="/assets/figures/decision-families.svg">Open figure ↗</a><a class="figure-link theme-dark" href="/assets/figures/decision-families-dark.svg">Open figure ↗</a></figcaption>
+        <picture class="theme-light"><source media="(max-width: 640px)" srcset="/assets/figures/decision-families-mobile.svg"><img src="/assets/figures/decision-families.svg" width="1280" height="640" loading="lazy" alt="Question counts by family: business and conversation 1,403; graph routing 743; tool decisions 128; turn taking 376; voice properties 1,886; language switching 331. Total: 4,867."></picture>
+        <picture class="theme-dark"><source media="(max-width: 640px)" srcset="/assets/figures/decision-families-mobile-dark.svg"><img src="/assets/figures/decision-families-dark.svg" width="1280" height="640" loading="lazy" alt="Question counts by family: business and conversation 1,403; graph routing 743; tool decisions 128; turn taking 376; voice properties 1,886; language switching 331. Total: 4,867."></picture>
       </figure>
       <details class="chart-data"><summary>Task descriptions and accessible chart data</summary>
       <div class="table-scroll"><table class="task-table"><caption class="sr-only">Six decision families and representative questions</caption><thead><tr><th scope="col">Decision family</th><th scope="col">What the model decides</th><th scope="col">Questions</th></tr></thead><tbody>
