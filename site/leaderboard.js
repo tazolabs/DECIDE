@@ -3,7 +3,6 @@ import { frontierPoints, sortModels, topFamilyModels, validateLeaderboard } from
 const percent = value => `${(100 * value).toFixed(2)}%`;
 const money = value => `$${value.toFixed(2)}`;
 const latency = value => `${new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 }).format(value)} ms`;
-const count = value => new Intl.NumberFormat('en-US').format(value);
 const svgNamespace = 'http://www.w3.org/2000/svg';
 
 function node(tag, className, text) {
@@ -46,11 +45,11 @@ function showTable(data, sort = 'dbs') {
 }
 
 const voiceCompanies = {
-  tazo: { name: 'Tazo Labs', logo: '/assets/brand/tazo-mark-teal.svg' },
-  'perceptron-mk1-5': { name: 'Perceptron', logo: '/assets/brand/perceptron.svg' },
-  'gpt-realtime-2-1': { name: 'OpenAI', logo: '/assets/brand/openai.png' },
-  'qwen2-5-omni-3b': { name: 'Alibaba · Qwen', logo: '/assets/brand/qwen.png' },
-  'gemini-2-5-flash': { name: 'Google', logo: '/assets/brand/google.png' },
+  tazo: 'Tazo Labs',
+  'perceptron-mk1-5': 'Perceptron',
+  'gpt-realtime-2-1': 'OpenAI',
+  'qwen2-5-omni-3b': 'Alibaba · Qwen',
+  'gemini-2-5-flash': 'Google',
 };
 
 function showVoiceLeaders(data) {
@@ -61,26 +60,12 @@ function showVoiceLeaders(data) {
     row.append(node('td', 'rank-column', String(index + 1).padStart(2, '0')));
     const heading = node('th', 'model-name');
     heading.scope = 'row';
-    const identity = node('div', 'voice-model');
     const company = voiceCompanies[model.id];
-    if (company) {
-      const logo = node('img', `company-logo company-${model.id}`);
-      logo.src = company.logo;
-      logo.alt = '';
-      logo.width = 32;
-      logo.height = 32;
-      identity.append(logo);
-    }
-    const name = node('div');
-    name.append(node('span', '', model.name));
-    if (company) name.append(node('small', '', company.name));
-    identity.append(name);
-    heading.append(identity);
+    heading.append(node('span', '', model.name));
+    if (company) heading.append(node('small', '', company));
     row.append(heading, node('td', 'metric-column voice-accuracy', percent(model.families.voice.accuracy)));
     body.append(row);
   });
-  const family = data.families.find(item => item.id === 'voice');
-  document.querySelector('#voice-question-count').textContent = `${count(family.questions)} questions · Caller emotion, audio disturbance and speaker count`;
 }
 
 // Keep every label legible without moving its data point. Leader lines connect displaced names.

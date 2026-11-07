@@ -20,7 +20,7 @@ The favorable quadrant is the top left. These monotonic transformations preserve
 
 Every model is labelled on the chart. Labels may move for legibility, with leader lines retaining the exact data-point locations. On small screens, the plot scrolls horizontally to keep those names readable. Hover, keyboard focus or tap shows raw accuracy, run cost and mean latency next to the point; Escape dismisses the tooltip.
 
-Company marks in the voice table are local assets sourced from their official websites; see `site/assets/brand/SOURCES.md`. No third-party image request is made by visitors.
+The voice table displays model names, company names and accuracies without company logos.
 
 To refresh from an approved internal aggregate report:
 
