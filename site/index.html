@@ -23,7 +23,7 @@
     <a class="wordmark" href="https://tazolabs.com/" aria-label="Tazo Labs homepage"><span class="tazo-symbol" aria-hidden="true"></span><span>tazo<span class="wordmark-sub">/labs</span></span></a>
     <div class="header-actions">
     <nav aria-label="Main navigation">
-      <a href="#overview">Overview</a><a href="#tasks">Tasks</a><a href="#examples">Examples</a><a href="#evaluation">Evaluation</a>
+      <a href="#overview">Overview</a><a href="#tasks">Tasks</a><a href="#examples">Examples</a><a href="#evaluation">Evaluation</a><a href="#faq">FAQ</a>
       <a href="https://github.com/tazolabs/DECIDE">GitHub <span aria-hidden="true">↗</span></a><a class="nav-evaluate" href="/evaluate">Evaluate <span aria-hidden="true">↗</span></a>
     </nav>
     <button class="theme-toggle" data-theme-toggle type="button" aria-label="Switch to dark mode" hidden><svg class="theme-light" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.9 13A9 9 0 0 1 11 3.1 9 9 0 1 0 20.9 13Z"/></svg><svg class="theme-dark" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"/></svg></button>
@@ -58,7 +58,6 @@
         <picture class="theme-dark"><source media="(max-width: 640px)" srcset="/assets/figures/benchmark-overview-mobile-dark.svg"><img src="/assets/figures/benchmark-overview-dark.svg" width="1280" height="622" loading="lazy" alt="DECIDE overview: clips from production calls, permitted earlier context and candidate decisions lead to one decision at the clip boundary, across six decision families."></picture>
         <figcaption><strong>Figure 1.</strong> From real calls to local decisions. Each question combines a fixed audio boundary, permitted context and candidate options. The waveforms are schematic; real clips are available in the six examples below. <a class="figure-link theme-light" href="/assets/figures/benchmark-overview.svg">Open figure ↗</a><a class="figure-link theme-dark" href="/assets/figures/benchmark-overview-dark.svg">Open figure ↗</a></figcaption>
       </figure>
-      <p class="small">The benchmark covers 570 source calls and 34 agents, predominantly in college admissions, with English and Hindi speech. A clip can support multiple questions. Reference decisions were manually annotated by a team of four.</p>
     </section>
     <section id="tasks" class="section" aria-labelledby="tasks-title">
       <p class="section-label">02 / Tasks</p><h2 id="tasks-title">Decisions across the voice-agent stack.</h2>
@@ -100,15 +99,50 @@ cd DECIDE
 pip install -r requirements.txt
 python evaluation.py validate --preview</code></pre><a class="text-link" href="https://github.com/tazolabs/DECIDE#evaluation">Evaluation instructions <span aria-hidden="true">→</span></a></div><aside><h3>Full benchmark evaluation</h3><p>Submit your model endpoint directly. API validation, evaluation and scoring run automatically in the background. Your API operator receives inference inputs; dataset files and reference labels are not returned.</p><a class="text-link" href="/evaluate">Evaluate a model <span aria-hidden="true">→</span></a></aside></div>
     </section>
-    <section id="citation" class="section citation" aria-labelledby="citation-title">
-      <p class="section-label">05 / Citation</p><h2 id="citation-title">Reference DECIDE.</h2><p>The paper and arXiv link will be added here when available.</p>
-      <div class="citation-head"><span>Provisional citation</span><button id="copy-citation" type="button">Copy BibTeX</button></div>
-      <pre><code id="bibtex">@misc{decide2026,
-  title = {DECIDE: Decision Evaluation in Calls:
-           Intent, Dialogue and Emotion},
-  year = {2026},
-  howpublished = {\url{https://github.com/tazolabs/DECIDE}}
-}</code></pre><p id="copy-status" class="sr-only" aria-live="polite"></p>
+    <section id="faq" class="section faq" aria-labelledby="faq-title">
+      <p class="section-label">05 / FAQ</p><h2 id="faq-title">DECIDE benchmark FAQ</h2>
+      <div class="faq-layout">
+        <div class="faq-questions" aria-label="Benchmark questions" hidden>
+          <button id="faq-tab-purpose" type="button" aria-controls="faq-purpose">What does DECIDE measure?</button>
+          <button id="faq-tab-data" type="button" aria-controls="faq-data">What data is the benchmark built from?</button>
+          <button id="faq-tab-models" type="button" aria-controls="faq-models">Can I compare audio and text-based models?</button>
+          <button id="faq-tab-scoring" type="button" aria-controls="faq-scoring">How are models scored?</button>
+          <button id="faq-tab-evaluate" type="button" aria-controls="faq-evaluate">How can I evaluate my model?</button>
+          <button id="faq-tab-access" type="button" aria-controls="faq-access">Is the full benchmark publicly available?</button>
+        </div>
+        <div class="faq-answers">
+          <article id="faq-purpose" class="faq-answer" aria-labelledby="faq-purpose-title">
+            <h3 id="faq-purpose-title">What does DECIDE measure?</h3>
+            <p>DECIDE measures whether a model can make the right decision at a specific moment in a voice-agent call, using a short audio clip, permitted context and candidate options.</p>
+            <p>Its six decision families cover business and conversation, graph routing, tool decisions, turn taking, voice properties and language switching.</p>
+          </article>
+          <article id="faq-data" class="faq-answer" aria-labelledby="faq-data-title">
+            <h3 id="faq-data-title">What data is the benchmark built from?</h3>
+            <p>DECIDE v1.0 contains 4,867 decision questions across 1,081 clips from real production voice-agent conversations. Clips are 3–25 seconds long and support 32 decision tasks.</p>
+            <p>A clip can support multiple questions. Each question asks for a decision supported by the conversation up to that clip’s cutoff.</p>
+          </article>
+          <article id="faq-models" class="faq-answer" aria-labelledby="faq-models-title">
+            <h3 id="faq-models-title">Can I compare audio and text-based models?</h3>
+            <p>Yes. Direct-audio models receive the clip and its permitted context. STT + text models receive a transcription and context instead.</p>
+            <p>Both choose from the question’s candidate decisions. Audio can carry cues such as tone, interference and overlapping speech that a transcript may not preserve.</p>
+          </article>
+          <article id="faq-scoring" class="faq-answer" aria-labelledby="faq-scoring-title">
+            <h3 id="faq-scoring-title">How are models scored?</h3>
+            <p>Accuracy measures how often a model’s selected decision matches the human reference label. Failed or missing predictions count as incorrect.</p>
+            <p>Hosted evaluations return aggregate scores by task, decision family and clip duration. Results for groups with fewer than 10 questions are withheld.</p>
+          </article>
+          <article id="faq-evaluate" class="faq-answer" aria-labelledby="faq-evaluate-title">
+            <h3 id="faq-evaluate-title">How can I evaluate my model?</h3>
+            <p>Submit a compatible model API endpoint on the <a href="/evaluate">evaluation page</a>. The service checks it on a public example, runs the private benchmark and returns aggregate results. No invitation is needed.</p>
+            <p>Start with the <a href="https://github.com/tazolabs/DECIDE#evaluation">GitHub evaluation instructions</a> to review the API contract and test your integration.</p>
+          </article>
+          <article id="faq-access" class="faq-answer" aria-labelledby="faq-access-title">
+            <h3 id="faq-access-title">Is the full benchmark publicly available?</h3>
+            <p>The full benchmark remains private. You can listen to <a href="#examples">six examples here</a> or explore <a href="https://huggingface.co/datasets/tazolabs/DECIDE-samples">20 labelled samples on Hugging Face</a>.</p>
+            <p>Hosted evaluation does not return dataset files or reference labels. Your model API operator receives the audio or text and context sent for inference.</p>
+          </article>
+        </div>
+      </div>
     </section>
   </main>
   <footer><p><a href="#">DECIDE</a> <span aria-hidden="true">/</span> A joint benchmark for voice-agent decisions.</p><p><a href="https://tazolabs.com/">Tazo Labs</a> × <a href="https://www.bolna.ai/">Bolna</a> · <a href="https://github.com/tazolabs/DECIDE">GitHub</a></p></footer>
