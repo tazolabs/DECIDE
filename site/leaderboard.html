@@ -74,7 +74,7 @@
           </div>
           <div id="frontier-tooltip" class="frontier-tooltip" role="tooltip" hidden></div>
         </div>
-        <figcaption>Top left is better. Latency index: 100 × L/(L + median latency); 50 is the median. Efficiency is accuracy per dollar, shown as a percentile. Hover, focus or tap a model for details.</figcaption>
+        <figcaption>Top left is better. Efficiency index: 100 × E/(E + median E), where E = accuracy/run cost. Latency index: 100 × L/(L + median L). Both indices use a 0–100 scale; 50 marks the reference median. Hover, focus or tap a model for details.</figcaption>
       </figure>
       <p id="frontier-status" class="sr-only" role="status" aria-live="polite"></p>
     </section>

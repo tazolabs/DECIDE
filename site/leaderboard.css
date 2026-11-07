@@ -15,6 +15,7 @@
 .quadrant-best{fill:var(--accent-strong);font-weight:600}
 .frontier-axis-label{fill:var(--muted);font-size:16px}
 .frontier-line{fill:none;stroke:var(--accent);stroke-width:2;stroke-linejoin:round;opacity:.7}
+.frontier-line-label{fill:var(--accent-strong);font-size:14px;font-weight:600;paint-order:stroke;stroke:var(--paper);stroke-width:5px;stroke-linejoin:round;pointer-events:none}
 .point-hit{fill:transparent}
 .point-dot{fill:var(--dim);stroke:var(--paper);stroke-width:2}
 .point-text .point-dot{fill:var(--muted)}
