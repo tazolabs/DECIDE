@@ -11,6 +11,10 @@ __pycache__/
 .gstack/
 node_modules/
 data/
+# Public model-level metrics only; benchmark rows remain ignored.
+!site/data/
+site/data/*
+!site/data/leaderboard.json
 private/
 runs/
 predictions*.jsonl

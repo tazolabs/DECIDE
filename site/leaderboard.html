@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Compare models on DECIDE, the benchmark for decisions in real voice-agent calls. Evaluation results are coming soon.">
+  <meta name="description" content="Compare 20 models on DECIDE by accuracy, cost, latency and DECIDE Balance Score. Explore the efficiency–latency frontier and leaders across five voice-agent task families.">
   <meta name="theme-color" content="#f6f9f9">
   <meta name="color-scheme" content="light dark">
   <meta property="og:title" content="DECIDE · Model leaderboard">
@@ -15,6 +15,8 @@
   <link rel="preload" href="/assets/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin>
   <script src="/theme.js"></script>
   <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/leaderboard.css">
+  <script type="module" src="/leaderboard.js"></script>
 </head>
 <body>
   <a class="skip" href="#main">Skip to content</a>
@@ -40,17 +42,48 @@
       <div class="institutions" aria-label="A partnership between Tazo Labs and Bolna"><a class="tazo-lockup" href="https://tazolabs.com/" aria-label="Tazo Labs"><span class="tazo-symbol" aria-hidden="true"></span>tazo<span>/labs</span></a><span class="affiliation-dot" aria-hidden="true">×</span><a class="bolna-lockup" href="https://www.bolna.ai/" aria-label="Bolna homepage"><img src="/assets/brand/bolna-logo.png" width="439" height="277" alt="Bolna"></a></div>
       <div class="resource-links">
         <a class="button primary" href="/evaluate">Evaluate a model <span class="arrow-tile" aria-hidden="true">↗</span></a>
-        <a class="button" href="/leaderboard" aria-current="page"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 21h18M5 21V11h4v10m2 0V4h4v17m2 0v-6h4v6"/></svg> Leaderboard</a>
+        <a class="button" href="#leaderboard" aria-current="page"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 21h18M5 21V11h4v10m2 0V4h4v17m2 0v-6h4v6"/></svg> Leaderboard</a>
         <a class="button" href="https://github.com/tazolabs/DECIDE"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5 2 12l6 7m8-14 6 7-6 7M14 3l-4 18"/></svg> Code</a>
         <span class="button pending" aria-disabled="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2H5v20h14V7Zm0 0v6h5M8 12h8m-8 4h8"/></svg> Paper <small>Coming soon</small></span>
         <a class="button" href="/#examples"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 14v-3a8 8 0 0 1 16 0v3M4 12H2v8h5v-8Zm16 0h2v8h-5v-8Z"/></svg> Listen to examples</a>
       </div>
     </section>
-    <div class="page-content">
-    <section id="leaderboard" class="section leaderboard-status" aria-labelledby="leaderboard-title">
-      <p class="section-label">Leaderboard</p>
-      <h2 id="leaderboard-title">Results coming soon.</h2>
-      <p>We’re evaluating models on DECIDE. Scores and comparisons will appear here once the evaluations are complete.</p>
+    <div class="page-content leaderboard-content">
+    <p id="leaderboard-loading" class="leaderboard-loading" role="status">Loading model results…</p>
+    <noscript><p class="leaderboard-loading">Enable JavaScript to view the interactive leaderboard. <a href="/data/leaderboard.json">View the aggregate results.</a></p></noscript>
+    <section id="leaderboard" class="section" aria-labelledby="leaderboard-title" data-leaderboard-content hidden>
+      <p class="section-label">01 / Leaderboard</p>
+      <h2 id="leaderboard-title">Decision quality. Serving efficiency.</h2>
+      <div class="leaderboard-toolbar">
+        <p class="leaderboard-meta">20 models · 4,867 decision questions</p>
+        <div class="sort-controls"><span>Sort by</span><div class="sort-options" role="group" aria-label="Sort models"><button type="button" data-sort="accuracy" aria-pressed="false" disabled>Accuracy</button><button type="button" data-sort="latency" aria-pressed="false" disabled>Latency</button><button type="button" data-sort="dbs" aria-pressed="true" disabled>DBS</button></div></div>
+      </div>
+      <p id="sort-status" class="sr-only" role="status" aria-live="polite"></p>
+      <div class="table-scroll" tabindex="0" role="region" aria-label="Model leaderboard; scroll horizontally on smaller screens"><table class="leaderboard-table"><caption class="sr-only">All models, sorted by DECIDE Balance Score by default. Higher accuracy and DBS are better; lower cost and latency are better.</caption><thead><tr><th scope="col">Rank</th><th scope="col">Model</th><th scope="col" data-sort-column="accuracy">Accuracy</th><th scope="col">Run cost</th><th scope="col" data-sort-column="latency">Mean latency</th><th scope="col" data-sort-column="dbs" aria-sort="descending">DBS</th></tr></thead><tbody id="model-results"></tbody></table></div>
+      <p class="measurement-note">Cost estimates include STT where used. Tazo uses an optimized 474 ms mean; Qwen2.5 Omni latencies are estimated from measurements. Other latencies are client-request means plus STT where used. Accuracy counts failed answers as incorrect.</p>
+      <div class="dbs-explainer">
+        <h3>DECIDE Balance Score (DBS)</h3>
+        <p>Accuracy, cost and latency become three scores between 0 and 1, combined with equal weights.</p>
+        <div class="dbs-equation" role="math" aria-label="DBS equals 100 times the cube root of accuracy times the cost utility times the latency utility">DBS = 100 × [ A × C<sub>m</sub>/(C<sub>m</sub> + C) × L<sub>m</sub>/(L<sub>m</sub> + L) ]<sup>1/3</sup></div>
+        <p id="score-references" class="score-references"></p>
+      </div>
+    </section>
+    <section id="frontier" class="section" aria-labelledby="frontier-title" data-leaderboard-content hidden>
+      <p class="section-label">02 / Pareto frontier</p>
+      <h2 id="frontier-title">Fastest on the frontier.</h2>
+      <p>Tazo combines the lowest mean latency with strong accuracy per dollar.</p>
+      <figure class="frontier-figure"><svg id="frontier-plot" viewBox="0 0 740 738" role="group" aria-label="Interactive efficiency–latency Pareto frontier"></svg><figcaption>The line links models not beaten on both efficiency and speed. Axes show percentile ranks, not proportional gaps. Hover, focus or tap for raw values.</figcaption></figure>
+      <div id="frontier-detail" class="frontier-detail" aria-live="polite" aria-atomic="true"></div>
+    </section>
+    <section id="family-leaders" class="section" aria-labelledby="family-title" data-leaderboard-content hidden>
+      <p class="section-label">03 / Task families</p>
+      <h2 id="family-title">The top three, by task.</h2>
+      <p>Ranked by accuracy within each family. DBS breaks ties.</p>
+      <div id="family-results" class="family-results"></div>
+    </section>
+    <section id="voice-leader" class="section voice-leader" aria-labelledby="voice-title" data-leaderboard-content hidden>
+      <div><p class="section-label">04 / Voice-based properties</p><h2 id="voice-title">Voice-based decisions.<br>Led by Tazo.</h2><p>Caller emotion · Audio disturbance · Speaker count</p></div>
+      <div class="voice-score"><strong id="tazo-voice-accuracy">82.61%</strong><span>#1 in DECIDE voice-property accuracy</span></div>
     </section>
     </div>
   </main>
