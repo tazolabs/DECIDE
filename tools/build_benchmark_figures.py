@@ -163,8 +163,9 @@ def overview(mobile=False):
 
 def distribution(mobile=False):
     desc='DECIDE v1.0 has 4867 decision questions: '+ '; '.join(f'{name}: {n}' for name,n,_,_ in FAMILIES)+'. Bar lengths encode question counts.'
-    f=Figure(640 if mobile else 1280, 1025 if mobile else 690, 'DECIDE question distribution by decision family', desc)
-    f.text(32 if mobile else 40, 57 if mobile else 54, 'What does DECIDE ask?', 35 if mobile else 38, 'display')
+    f=Figure(640 if mobile else 1280, 975 if mobile else 640, 'DECIDE question distribution by decision family', desc)
+    # The surrounding section supplies the heading; remove its duplicate and space.
+    f.parts.append('<g transform="translate(0,-50)">')
     f.text(32 if mobile else 40, 98 if mobile else 93, '4,867 questions across six decision families', 20 if mobile else 18, color=MUTED)
     if mobile:
         for i,(name,n,detail,kind) in enumerate(FAMILIES):
@@ -185,12 +186,15 @@ def distribution(mobile=False):
             f.rect(450,y-9,688,13,SOFT,radius=3);f.rect(450,y-9,688*n/2000,13,TEAL,radius=3)
             f.text(1240,y+3,f'{n:,}',20,'mono',INK,'end')
         f.line(40,660,1240,660);f.text(40,682,'QUESTION COUNTS / DECIDE v1.0',11,'mono',MUTED)
+    f.parts.append('</g>')
     f.save('decision-families-mobile.svg' if mobile else 'decision-families.svg')
 
 
 def ridge():
     # Decorative ridge motif inspired by the supplied brand kit, not an acoustic measurement.
     f=Figure(1280,165,'Tazo ridge waveform motif','Decorative stacked line artwork inspired by the Tazo brand kit.')
+    # Stretch this decorative motif with the viewport; no blank SVG letterboxing.
+    f.parts[0] = f.parts[0].replace('role="img"', 'preserveAspectRatio="none" role="img"')
     for row in reversed(range(18)):
         points=[]
         for i in range(321):

@@ -77,10 +77,15 @@ Use a current Vercel CLI (`npm i -g vercel@latest`). Before deploying, check tha
 the resolved project and team match those above. Git pushes to `main` should
 trigger production deployments once the repository integration is connected.
 
+The public leaderboard shell is `site/leaderboard.html`, served at `/leaderboard`
+by Vercel's existing clean-URL setting. It shares the landing-page hero and
+currently shows a results-coming-soon message. Keep the hero and resource links
+in both static pages in sync when adding the paper link or updating branding.
+
 ## Updating the paper link
 
 When the paper is public, replace the disabled `Paper / Coming soon` span in
-`site/index.html` with a link to the arXiv abstract. Add a verified citation at
+`site/index.html` and `site/leaderboard.html` with a link to the arXiv abstract. Add a verified citation at
 that point; the website does not show a provisional BibTeX section. The draft
 PDF is intentionally not published by this repository.
 
