@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Compare 20 models on DECIDE by accuracy, cost, latency and DECIDE Balance Score. Explore the efficiency–latency frontier and leaders across five voice-agent task families.">
+  <meta name="description" content="Compare 20 models on DECIDE by accuracy, cost, latency and DECIDE Balance Score. Explore the efficiency–latency frontier and the top five models for voice-based properties.">
   <meta name="theme-color" content="#f6f9f9">
   <meta name="color-scheme" content="light dark">
   <meta property="og:title" content="DECIDE · Model leaderboard">
@@ -66,22 +66,33 @@
       <p class="section-label">02 / Pareto frontier</p>
       <h2 id="frontier-title">Fastest on the frontier.</h2>
       <p>Tazo combines the lowest mean latency with strong accuracy per dollar.</p>
-      <figure class="frontier-figure"><svg id="frontier-plot" viewBox="0 0 740 738" role="group" aria-label="Interactive efficiency–latency Pareto frontier"></svg><figcaption>The line links models not beaten on both efficiency and speed. Axes show percentile ranks, not proportional gaps. Hover, focus or tap for raw values.</figcaption></figure>
-      <div id="frontier-detail" class="frontier-detail" aria-live="polite" aria-atomic="true"></div>
+      <figure class="frontier-figure">
+        <p class="frontier-scroll-hint">Scroll horizontally to see every model →</p>
+        <div class="frontier-chart">
+          <div class="frontier-scroll" tabindex="0" role="region" aria-label="Efficiency–latency chart; scroll horizontally on smaller screens">
+            <svg id="frontier-plot" viewBox="0 0 1000 790" role="group" aria-label="Interactive efficiency–latency Pareto frontier"></svg>
+          </div>
+          <div id="frontier-tooltip" class="frontier-tooltip" role="tooltip" hidden></div>
+        </div>
+        <figcaption>Top left is better. Latency index: 100 × L/(L + median latency); 50 is the median. Efficiency is accuracy per dollar, shown as a percentile. Hover, focus or tap a model for details.</figcaption>
+      </figure>
+      <p id="frontier-status" class="sr-only" role="status" aria-live="polite"></p>
     </section>
-    <section id="family-leaders" class="section" aria-labelledby="family-title" data-leaderboard-content hidden>
-      <p class="section-label">03 / Task families</p>
-      <h2 id="family-title">The top three, by task.</h2>
-      <div id="family-results" class="family-results"></div>
-    </section>
-    <section id="voice-leader" class="section voice-leader" aria-labelledby="voice-title" data-leaderboard-content hidden>
-      <div class="voice-intro">
-        <p class="section-label">04 / Voice-based properties</p>
-        <a class="tazo-lockup voice-brand" href="https://tazolabs.com/" aria-label="Tazo Labs homepage"><span class="tazo-symbol" aria-hidden="true"></span>tazo<span>/labs</span></a>
-        <h2 id="voice-title">Voice-based decisions.<br>Led by Tazo.</h2>
-        <p>Caller emotion · Audio disturbance · Speaker count</p>
+    <section id="voice-properties" class="section voice-properties" aria-labelledby="voice-title" data-leaderboard-content hidden>
+      <div id="voice-leader" class="voice-leader">
+        <div class="voice-intro">
+          <p class="section-label">03 / Voice-based properties</p>
+          <a class="tazo-lockup voice-brand" href="https://tazolabs.com/" aria-label="Tazo Labs homepage"><span class="tazo-symbol" aria-hidden="true"></span>tazo<span>/labs</span></a>
+          <h2 id="voice-title">Voice-based decisions.<br>Led by Tazo.</h2>
+          <p>Caller emotion · Audio disturbance · Speaker count</p>
+        </div>
+        <div class="voice-score"><strong id="tazo-voice-accuracy">82.61%</strong><span>#1 in DECIDE voice-property accuracy</span></div>
       </div>
-      <div class="voice-score"><strong id="tazo-voice-accuracy">82.61%</strong><span>#1 in DECIDE voice-property accuracy</span></div>
+      <div class="voice-ranking">
+        <h3>Top five in voice-based properties</h3>
+        <p id="voice-question-count"></p>
+        <div class="table-scroll" tabindex="0" role="region" aria-label="Top five models for voice-based properties"><table class="leaderboard-table voice-table"><caption class="sr-only">Top five models ranked by voice-property accuracy.</caption><thead><tr><th scope="col">Rank</th><th scope="col">Model</th><th scope="col">Accuracy</th></tr></thead><tbody id="voice-results"></tbody></table></div>
+      </div>
     </section>
     </div>
   </main>

@@ -36,10 +36,17 @@ export function percentileRanks(values, higherIsBetter = true) {
   return directed.map(value => ranks.get(value));
 }
 
-export function frontierPoints(models) {
+export function normalizedLatency(latency, reference) {
+  if (![latency, reference].every(Number.isFinite) || Math.min(latency, reference) <= 0) {
+    throw new Error('Invalid latency measurements');
+  }
+  return 100 * latency / (reference + latency);
+}
+
+export function frontierPoints(models, reference) {
   const efficiency = models.map(model => model.accuracy / model.cost_usd);
-  const x = percentileRanks(efficiency);
-  const y = percentileRanks(models.map(model => model.latency_ms), false);
+  const x = models.map(model => normalizedLatency(model.latency_ms, reference.latency_ms));
+  const y = percentileRanks(efficiency);
   return models.map((model, i) => ({
     ...model, x: x[i], y: y[i], efficiency: efficiency[i],
     frontier: !models.some((other, j) => efficiency[j] >= efficiency[i] && other.latency_ms <= model.latency_ms
