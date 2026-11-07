@@ -43,10 +43,20 @@ export function normalizedLatency(latency, reference) {
   return 100 * latency / (reference + latency);
 }
 
+export function normalizedEfficiency(efficiency, reference) {
+  if (![efficiency, reference].every(Number.isFinite) || efficiency < 0 || reference <= 0) {
+    throw new Error('Invalid efficiency measurements');
+  }
+  return efficiency === 0 ? 0 : 100 / (1 + reference / efficiency);
+}
+
 export function frontierPoints(models, reference) {
   const efficiency = models.map(model => model.accuracy / model.cost_usd);
+  const ordered = [...efficiency].sort((a, b) => a - b);
+  const middle = Math.floor(ordered.length / 2);
+  const median = ordered.length % 2 ? ordered[middle] : (ordered[middle - 1] + ordered[middle]) / 2;
   const x = models.map(model => normalizedLatency(model.latency_ms, reference.latency_ms));
-  const y = percentileRanks(efficiency);
+  const y = efficiency.map(value => normalizedEfficiency(value, median));
   return models.map((model, i) => ({
     ...model, x: x[i], y: y[i], efficiency: efficiency[i],
     frontier: !models.some((other, j) => efficiency[j] >= efficiency[i] && other.latency_ms <= model.latency_ms

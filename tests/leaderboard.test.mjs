@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
-import { decisionBalanceScore, frontierPoints, normalizedLatency, percentileRanks, sortModels, topFamilyModels, validateLeaderboard } from '../site/leaderboard-model.js';
+import { decisionBalanceScore, frontierPoints, normalizedEfficiency, normalizedLatency, percentileRanks, sortModels, topFamilyModels, validateLeaderboard } from '../site/leaderboard-model.js';
 import { publicLeaderboard } from '../tools/export-leaderboard.mjs';
 
 const snapshot = JSON.parse(await readFile(new URL('../site/data/leaderboard.json', import.meta.url), 'utf8'));
@@ -74,6 +74,33 @@ test('normalized latency is bounded, monotonic, median-centered and independent 
   assert.throws(() => normalizedLatency(100, 0));
 });
 
+test('the efficiency index reflects measured values, compresses large ratios and is currency-invariant', () => {
+  assert.equal(normalizedEfficiency(0, 1), 0);
+  assert.equal(normalizedEfficiency(1, 1), 50);
+  assert.equal(normalizedEfficiency(4, 1), 80);
+  assert(normalizedEfficiency(1.001, 1) - normalizedEfficiency(1, 1) < .03);
+  const values = snapshot.models.map(model => model.accuracy / model.cost_usd).sort((a, b) => a - b);
+  const reference = (values[9] + values[10]) / 2;
+  values.forEach((value, i) => {
+    const normalized = normalizedEfficiency(value, reference);
+    assert(normalized > 0 && normalized < 100);
+    assert(Math.abs(normalized - normalizedEfficiency(value / 100, reference / 100)) < 1e-12);
+    if (i) assert(normalized > normalizedEfficiency(values[i - 1], reference));
+  });
+  for (const value of [-1, NaN, Infinity]) assert.throws(() => normalizedEfficiency(value, reference));
+  assert.throws(() => normalizedEfficiency(1, 0));
+});
+
+test('the efficiency reference uses the median for odd and even model counts without reordering inputs', () => {
+  const models = [.3, .1, .2].map((accuracy, i) => ({ id: String(i), accuracy, cost_usd: 1, latency_ms: i + 1 }));
+  const odd = frontierPoints(models, { latency_ms: 2 });
+  assert.equal(odd.find(point => point.accuracy === .2).y, 50);
+  assert.deepEqual(models.map(model => model.accuracy), [.3, .1, .2]);
+  const even = frontierPoints(models.slice(1), { latency_ms: 2 });
+  assert(Math.abs(even[0].y - 40) < 1e-12);
+  assert(Math.abs(even[1].y - 100 * .2 / (.2 + .15)) < 1e-12);
+});
+
 test('the top-left frontier preserves the raw efficiency–latency dominance relationships', () => {
   assert.deepEqual(percentileRanks([1, 2, 2, 100]), [0, 50, 50, 100]);
   assert.deepEqual(percentileRanks([1, 2, 2, 100], false), [100, 50, 50, 0]);
@@ -93,6 +120,8 @@ test('the top-left frontier preserves the raw efficiency–latency dominance rel
   assert.equal(tazo.frontier, true);
   assert.equal(tazo.x, Math.min(...points.map(point => point.x)));
   assert(tazo.x < 50 && tazo.y > 50);
+  assert(Math.abs(tazo.y - 58.227675873703724) < 1e-10);
+  assert(Math.abs(points.find(point => point.id === 'perceptron-mk1-5').y - 69.61433074083854) < 1e-10);
 });
 
 test('invalid metrics fail rather than silently changing rankings', () => {

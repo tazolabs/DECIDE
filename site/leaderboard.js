@@ -84,10 +84,10 @@ function showVoiceLeaders(data) {
 }
 
 // Keep every label legible without moving its data point. Leader lines connect displaced names.
-function labelFrontier(svg, points, x, y) {
+function labelFrontier(svg, points, x, y, reserved = []) {
   const layer = svgNode('g', { class: 'frontier-labels', 'aria-hidden': 'true' });
   svg.append(layer);
-  const occupied = [];
+  const occupied = [...reserved];
   const overlaps = (a, b, gap = 4) => a.x < b.x + b.width + gap && a.x + a.width + gap > b.x
     && a.y < b.y + b.height + gap && a.y + a.height + gap > b.y;
   [...points].sort((a, b) => Number(b.id === 'tazo') - Number(a.id === 'tazo') || b.y - a.y).forEach(point => {
@@ -128,7 +128,7 @@ function showFrontier(data) {
   const x = value => 130 + value * 7.5;
   const y = value => 650 - value * 5.6;
   svg.replaceChildren(svgNode('title', {}, 'DECIDE efficiency–latency Pareto frontier'),
-    svgNode('desc', {}, 'All 20 evaluated models. Lower normalized latency is better on the horizontal axis. Higher accuracy-per-dollar percentile is better on the vertical axis. The top-left quadrant is favorable. Every model is labelled; focus or activate a point for its raw metrics.'));
+    svgNode('desc', {}, 'All 20 evaluated models. Lower normalized latency is better on the horizontal axis. Higher normalized efficiency is better on the vertical axis. Both indices use a median-centered scale from 0 to 100. The top-left quadrant is favorable. Every model is labelled; focus or activate a point for its raw metrics.'));
   svg.append(svgNode('rect', { x: x(0), y: y(100), width: 375, height: 280, class: 'frontier-favorable' }));
   for (const value of [0, 25, 50, 75, 100]) {
     svg.append(svgNode('line', { x1: x(value), x2: x(value), y1: y(0), y2: y(100), class: value === 50 ? 'frontier-midpoint' : 'frontier-grid' }),
@@ -141,9 +141,27 @@ function showFrontier(data) {
     svgNode('text', { x: x(0), y: 719, class: 'quadrant-label' }, 'Faster · less efficient'),
     svgNode('text', { x: x(53), y: 719, class: 'quadrant-label' }, 'Slower · less efficient'),
     svgNode('text', { x: x(50), y: 765, 'text-anchor': 'middle', class: 'frontier-axis-label' }, 'Normalized latency · lower is better ←'),
-    svgNode('text', { transform: 'translate(35 370) rotate(-90)', 'text-anchor': 'middle', class: 'frontier-axis-label' }, 'Efficiency · accuracy per dollar ↑'));
+    svgNode('text', { transform: 'translate(35 370) rotate(-90)', 'text-anchor': 'middle', class: 'frontier-axis-label' }, 'Efficiency index · higher is better ↑'));
   const frontier = points.filter(point => point.frontier).sort((a, b) => a.x - b.x);
   svg.append(svgNode('path', { d: frontier.map((point, index) => `${index ? 'L' : 'M'}${x(point.x)},${y(point.y)}`).join(' '), class: 'frontier-line' }));
+  // Label the longest frontier segment so the caption follows the actual data.
+  const segment = frontier.slice(1).map((point, index) => ({ start: frontier[index], end: point }))
+    .sort((a, b) => Math.hypot(x(b.end.x) - x(b.start.x), y(b.end.y) - y(b.start.y))
+      - Math.hypot(x(a.end.x) - x(a.start.x), y(a.end.y) - y(a.start.y)))[0];
+  const reserved = [];
+  if (segment) {
+    const cx = (x(segment.start.x) + x(segment.end.x)) / 2;
+    const cy = (y(segment.start.y) + y(segment.end.y)) / 2;
+    const angle = Math.atan2(y(segment.end.y) - y(segment.start.y), x(segment.end.x) - x(segment.start.x)) * 180 / Math.PI;
+    const label = svgNode('text', { x: cx, y: cy - 10, 'text-anchor': 'middle',
+      transform: `rotate(${angle} ${cx} ${cy})`, class: 'frontier-line-label' }, 'Pareto Frontier');
+    svg.append(label);
+    const bounds = label.getBoundingClientRect();
+    const svgBounds = svg.getBoundingClientRect();
+    const scale = 1000 / svgBounds.width;
+    reserved.push({ x: (bounds.x - svgBounds.x) * scale, y: (bounds.y - svgBounds.y) * scale,
+      width: bounds.width * scale, height: bounds.height * scale });
+  }
   const chart = document.querySelector('.frontier-chart');
   const tooltip = document.querySelector('#frontier-tooltip');
   const status = document.querySelector('#frontier-status');
@@ -202,7 +220,7 @@ function showFrontier(data) {
     });
     svg.append(group);
   });
-  labelFrontier(svg, points, x, y);
+  labelFrontier(svg, points, x, y, reserved);
   document.addEventListener('keydown', event => { if (event.key === 'Escape') hideTooltip(); });
   document.addEventListener('pointerdown', event => { if (!event.target.closest('.frontier-point')) hideTooltip(); });
   document.querySelector('.frontier-scroll').addEventListener('scroll', () => {
