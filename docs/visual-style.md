@@ -21,11 +21,12 @@ DECIDE is presented as a joint benchmark from Tazo Labs and Bolna. The hero pair
 both logos under “Developed in partnership”; recordings are described generically
 as real production conversations between agents and callers.
 
-The page uses the available viewport width with responsive side padding. The
-decorative hero ridge extends to both screen edges, and the five resource
-buttons share equal columns on desktop. On narrow screens, those buttons form
-two columns with the examples link spanning the final row. The evaluation
-section uses two equal columns with matching heading and link baselines.
+The hero and header use the viewport width, with the decorative ridge extending
+to both screen edges. The five resource buttons form a compact, centered group
+on desktop. On narrow screens, those buttons form two columns with the examples
+link spanning the final row. Below the hero, statistics and sections sit in the
+original centered 1,080px container, with responsive side padding. The evaluation
+section keeps two equal columns with matching heading and link baselines.
 
 `site/leaderboard.html` shares the benchmark hero, partner logos and theme.
 It displays a results-coming-soon message until scores are ready. Navigation

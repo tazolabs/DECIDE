@@ -28,7 +28,7 @@
     <button class="theme-toggle" data-theme-toggle type="button" aria-label="Switch to dark mode" hidden><svg class="theme-light" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.9 13A9 9 0 0 1 11 3.1 9 9 0 1 0 20.9 13Z"/></svg><svg class="theme-dark" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"/></svg></button>
     </div>
   </header>
-  <main id="main">
+  <main id="main" class="benchmark-main">
     <section class="hero" aria-labelledby="title">
       <img class="hero-ridge theme-light" src="/assets/figures/ridge.svg" width="1280" height="165" alt="" aria-hidden="true">
       <img class="hero-ridge theme-dark" src="/assets/figures/ridge-dark.svg" width="1280" height="165" alt="" aria-hidden="true">
@@ -46,6 +46,7 @@
         <a class="button" href="/#examples"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 14v-3a8 8 0 0 1 16 0v3M4 12H2v8h5v-8Zm16 0h2v8h-5v-8Z"/></svg> Listen to examples</a>
       </div>
     </section>
+    <div class="page-content">
     <dl class="statistics" aria-label="Benchmark at a glance">
       <div><dt>4,867</dt><dd>decision questions</dd></div><div><dt>1,081</dt><dd>audio clips</dd></div><div><dt>32</dt><dd>decision tasks</dd></div><div><dt>3–25<span>s</span></dt><dd>clip duration</dd></div>
     </dl>
@@ -54,6 +55,7 @@
       <h2 id="leaderboard-title">Results coming soon.</h2>
       <p>We’re evaluating models on DECIDE. Scores and comparisons will appear here once the evaluations are complete.</p>
     </section>
+    </div>
   </main>
   <footer><p><a href="/">DECIDE</a> <span aria-hidden="true">/</span> A joint benchmark for voice-agent decisions.</p><p><a href="https://tazolabs.com/">Tazo Labs</a> × <a href="https://www.bolna.ai/">Bolna</a> · <a href="https://github.com/tazolabs/DECIDE">GitHub</a></p></footer>
 </body>
