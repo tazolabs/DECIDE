@@ -77,12 +77,12 @@ Use a current Vercel CLI (`npm i -g vercel@latest`). Before deploying, check tha
 the resolved project and team match those above. Git pushes to `main` should
 trigger production deployments once the repository integration is connected.
 
-## Updating paper links and citation
+## Updating the paper link
 
 When the paper is public, replace the disabled `Paper / Coming soon` span in
-`site/index.html` with a link to the arXiv abstract. Update the provisional BibTeX
-in the page and README, and add the identifier. The draft PDF is intentionally
-not published by this repository.
+`site/index.html` with a link to the arXiv abstract. Add a verified citation at
+that point; the website does not show a provisional BibTeX section. The draft
+PDF is intentionally not published by this repository.
 
 ## Checks
 
@@ -94,7 +94,8 @@ npm ci
 npm test
 ```
 
-Browser-check each example's audio and reference disclosure, the citation copy
-button, keyboard focus, and mobile layout. Run the public-content check again
+Browser-check each example's audio and reference disclosure, FAQ selection and
+keyboard navigation, keyboard focus, and mobile layout in both themes. FAQ
+answers remain readable without JavaScript. Run the public-content check again
 after staging files and before pushing. Full evaluation downloads and run outputs
 belong in ignored directories.

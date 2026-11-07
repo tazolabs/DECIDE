@@ -77,16 +77,41 @@ Promise.all([readRows("/preview/questions.jsonl"), readRows("/preview/answers.js
     panel.replaceChildren(element("p", "", "The examples could not be loaded. Refresh the page, or open the public preview in the GitHub repository."));
   });
 
-document.querySelector("#copy-citation").addEventListener("click", async () => {
-  const button = document.querySelector("#copy-citation");
-  const status = document.querySelector("#copy-status");
-  try {
-    await navigator.clipboard.writeText(document.querySelector("#bibtex").textContent);
-    button.textContent = "Copied";
-    status.textContent = "BibTeX citation copied to clipboard.";
-    setTimeout(() => { button.textContent = "Copy BibTeX"; }, 2500);
-  } catch {
-    status.classList.remove("sr-only");
-    status.textContent = "Select and copy the citation text below.";
-  }
-});
+// All answers remain readable without JavaScript. Enhance them into vertical
+// tabs only after their controls are ready; preview loading is independent.
+const faq = document.querySelector(".faq-layout");
+if (faq) {
+  const questions = faq.querySelector(".faq-questions");
+  const buttons = [...questions.querySelectorAll("button")];
+  const answers = buttons.map((button) => document.getElementById(button.getAttribute("aria-controls")));
+  const selectQuestion = (selected) => {
+    buttons.forEach((button, index) => {
+      button.setAttribute("aria-selected", String(index === selected));
+      button.tabIndex = index === selected ? 0 : -1;
+      answers[index].hidden = index !== selected;
+    });
+  };
+  questions.setAttribute("role", "tablist");
+  questions.setAttribute("aria-orientation", "vertical");
+  buttons.forEach((button, index) => {
+    button.setAttribute("role", "tab");
+    answers[index].setAttribute("role", "tabpanel");
+    answers[index].setAttribute("aria-labelledby", button.id);
+    answers[index].tabIndex = 0;
+    button.addEventListener("click", () => selectQuestion(index));
+    button.addEventListener("keydown", (event) => {
+      let next;
+      if (event.key === "ArrowDown") next = (index + 1) % buttons.length;
+      else if (event.key === "ArrowUp") next = (index - 1 + buttons.length) % buttons.length;
+      else if (event.key === "Home") next = 0;
+      else if (event.key === "End") next = buttons.length - 1;
+      else return;
+      event.preventDefault();
+      selectQuestion(next);
+      buttons[next].focus();
+    });
+  });
+  selectQuestion(0);
+  faq.classList.add("is-enhanced");
+  questions.hidden = false;
+}
