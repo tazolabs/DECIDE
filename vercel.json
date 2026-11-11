@@ -12,8 +12,16 @@
       "memory": 2048,
       "includeFiles": "site/preview/**",
       "experimentalTriggers": [{ "type": "queue/v2beta", "topic": "decide-evaluations" }]
+    },
+    "api/consume-submission-alerts.mjs": {
+      "maxDuration": 60,
+      "experimentalTriggers": [{ "type": "queue/v2beta", "topic": "decide-submission-alerts" }]
+    },
+    "api/recover-submission-alerts.mjs": {
+      "maxDuration": 60
     }
   },
+  "crons": [{ "path": "/api/recover-submission-alerts", "schedule": "*/5 * * * *" }],
   "headers": [
     { "source": "/(.*)", "headers": [
       { "key": "X-Content-Type-Options", "value": "nosniff" },
