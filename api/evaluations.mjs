@@ -3,6 +3,7 @@ import { db, getJob, publicJob } from '../server/database.mjs';
 import { admissionIdentity, admissionLimits } from '../server/admission.mjs';
 import { emptyMetrics } from '../server/metrics.mjs';
 import { enqueue } from '../server/worker.mjs';
+import { notifySubmission } from '../server/submission-alerts.mjs';
 import { authorizeResult, encryptSecret, errorResponse, PublicError,
   resultToken, safeResponse, sha256, validateSubmission } from '../server/security.mjs';
 
@@ -34,6 +35,7 @@ async function submit(request) {
       throttled ? code.includes('daily') ? identity.retryAfter : 60 : 0);
   }
   const job = await getJob(jobId);
+  await notifySubmission(job);
   if (['queued', 'running'].includes(job.status)) {
     try { await enqueue(jobId, job.cursor); }
     catch { throw new PublicError('queue_temporarily_unavailable_retry_same_submission', 503); }

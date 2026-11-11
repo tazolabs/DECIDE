@@ -4,6 +4,7 @@ import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { db, publicJob } from '../server/database.mjs';
 import { resultToken } from '../server/security.mjs';
+import { recoverSubmissionAlerts } from '../server/submission-alerts.mjs';
 
 const [command, ...args] = process.argv.slice(2);
 const privateRoot = resolve(dirname(fileURLToPath(import.meta.url)), '../private');
@@ -27,6 +28,8 @@ try {
       for (const statement of statements) await db().query(statement, []);
     }
     console.log('Hosted evaluator database schema and migrations ready.');
+  } else if (command === 'retry-alerts') {
+    console.log(JSON.stringify(await recoverSubmissionAlerts(), null, 2));
   } else if (command === 'status') {
     console.log(JSON.stringify(await publicJob(option('id')), null, 2));
   } else if (command === 'receipt') {
@@ -37,7 +40,7 @@ try {
     await writeFile(path, JSON.stringify({ id, result_token: resultToken(id), service: 'https://decide-benchmark.vercel.app' }, null, 2) + '\n', { mode: 0o600 });
     console.log(`Result receipt saved to ${path}.`);
   } else {
-    console.error('Use setup | status --id UUID | receipt --id UUID');
+    console.error('Use setup | retry-alerts | status --id UUID | receipt --id UUID');
     process.exitCode = 1;
   }
 } catch (error) {

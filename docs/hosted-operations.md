@@ -38,6 +38,8 @@ Production-only environment variables:
 | `DECIDE_BUNDLE_SHA256` | Expected SHA-256 of `hosted/decide-v1.json.gz` |
 | `DECIDE_ENCRYPTION_KEY` | Persistent 32-byte key, encoded as 64 lowercase hex characters |
 | `DECIDE_PUBLIC_ORIGIN` | `https://decide-benchmark.vercel.app` |
+| `DECIDE_SLACK_WEBHOOK_URL` | Optional channel-specific Slack Incoming Webhook for new submissions |
+| `CRON_SECRET` | Random secret authorizing scheduled Slack-alert recovery |
 
 Keep these in Vercel production environment settings and a gitignored
 `.env.hosted.local` for operator commands. Do not put them in public browser
@@ -92,6 +94,51 @@ node --env-file=.env.hosted.local tools/hosted-admin.mjs receipt --id JOB_UUID \
 The status command exposes only participant-safe fields. Receipts grant read and
 cancel access; keep them private. Cancelling a running job uses the receipt or a
 restricted operator SQL update that also clears `api_key_ciphertext` and the lease.
+
+## Slack submission alerts
+
+Create a Slack app, enable Incoming Webhooks, and add a webhook to the desired
+channel using [Slack's setup guide](https://docs.slack.dev/messaging/sending-messages-using-incoming-webhooks/).
+Add its URL as the sensitive **production-only** `DECIDE_SLACK_WEBHOOK_URL` environment
+variable on `kodimo/decide-benchmark`. Add a cryptographically random `CRON_SECRET`
+there as well. Keep local copies only in gitignored `.env.hosted.local`.
+Apply `npm run db:setup` and deploy after configuring these variables.
+
+Each newly accepted preview or full-benchmark job creates a notification. Slack
+shows the model name, input modality, run type, question count, submission time
+and evaluation ID. It receives no model keys, endpoints, receipt tokens, prompts
+or transcripts. Submitter identity is not collected. Historical jobs are left
+unnotified by migration `003-submission-alerts.sql`.
+
+Alerts use the separate private `decide-submission-alerts` queue. Publication or
+delivery failures never stop an evaluation. Database leases and sent markers
+deduplicate consumer redelivery and repeated submissions using the same
+idempotency key. The authenticated `/api/recover-submission-alerts` cron runs every
+five minutes to recover queue-publication failures or expired leases. Temporary
+Slack/network errors back off and honor `Retry-After`, up to 12 delivery attempts;
+permanent webhook errors stop alert retries. Like other incoming-webhook systems,
+an ambiguous network acknowledgment or crash after Slack accepts a message but
+before the database commit can still cause a duplicate alert.
+
+Check delivery with a restricted database query:
+
+```sql
+SELECT id, model, slack_alert_status, slack_alert_attempts,
+       slack_alert_sent_at, slack_alert_error
+FROM decide_jobs ORDER BY created_at DESC;
+```
+
+After fixing a configuration problem, reset only the affected jobs to
+`slack_alert_status='pending'`, `slack_alert_attempts=0`, clear
+`slack_alert_next_attempt_at` and any alert lease, then run:
+
+```bash
+node --env-file=.env.hosted.local tools/hosted-admin.mjs retry-alerts
+```
+
+The webhook secret is never shown in logs or public status/report responses.
+Do not configure the webhook in preview environments: preview deployments must
+not send production Slack messages or access the production database.
 
 ## Updating the worker data
 
