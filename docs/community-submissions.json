@@ -9,17 +9,18 @@
       "source_url": "https://github.com/tazolabs/DECIDE/issues/21#issuecomment-6778380819",
       "cost": {
         "status": "gpu-runtime-estimate",
-        "hourly_rate_usd": 3.59,
+        "hourly_rate_usd": 1.99,
         "gpu_count": 1,
-        "hardware": "NVIDIA H200 141 GB",
-        "source_url": "https://www.runpod.io/gpu-models/h200",
-        "hardware_source_url": "https://github.com/tazolabs/DECIDE/issues/21",
-        "basis": "Full recorded run duration multiplied by the Runpod Community Cloud reference rate for one H200.",
+        "hardware": "NVIDIA H100 PCIe 80 GB",
+        "source_url": "https://www.runpod.io/gpu-models/h100",
+        "basis": "Full recorded run duration multiplied by the Runpod Community Cloud reference rate for one H100 PCIe 80 GB.",
         "assumptions": [
-          "Assumes Turbo used one H200, matching Flash; GPU type is not independently confirmed for Turbo.",
-          "Assumes the GPU is allocated for the entire hosted run window.",
+          "Uses a one-H100 reference configuration for Turbo; its actual GPU type is not independently confirmed.",
+          "Assumes the GPU is allocated for the entire recorded hosted run window.",
+          "The recorded run window is retained; performance on an H100 has not been measured.",
           "Reference compute-only estimate; excludes storage, tax and other fees."
-        ]
+        ],
+        "hardware_source_url": "https://github.com/tazolabs/DECIDE/issues/21"
       }
     },
     {
@@ -50,17 +51,18 @@
       "source_url": "https://github.com/tazolabs/DECIDE/issues/21",
       "cost": {
         "status": "gpu-runtime-estimate",
-        "hourly_rate_usd": 3.59,
+        "hourly_rate_usd": 1.99,
         "gpu_count": 1,
-        "hardware": "NVIDIA H200 141 GB",
-        "source_url": "https://www.runpod.io/gpu-models/h200",
-        "hardware_source_url": "https://github.com/tazolabs/DECIDE/issues/21",
-        "basis": "Full recorded run duration multiplied by the Runpod Community Cloud reference rate for one H200.",
+        "hardware": "NVIDIA H100 PCIe 80 GB",
+        "source_url": "https://www.runpod.io/gpu-models/h100",
+        "basis": "Full recorded run duration multiplied by the Runpod Community Cloud reference rate for one H100 PCIe 80 GB.",
         "assumptions": [
-          "Flash submitter reports one H200.",
-          "Assumes the GPU is allocated for the entire hosted run window.",
+          "Uses a one-H100 reference configuration for cost; the Flash submitter reported running on an H200.",
+          "Assumes the GPU is allocated for the entire recorded hosted run window.",
+          "The recorded run window is retained; performance on an H100 has not been measured.",
           "Reference compute-only estimate; excludes storage, tax and other fees."
-        ]
+        ],
+        "hardware_source_url": "https://github.com/tazolabs/DECIDE/issues/21"
       }
     },
     {
@@ -69,8 +71,18 @@
       "model_id": "laya-embeddinglabs",
       "evaluation_id": "a58795ef-79b3-4032-ada3-50ed7956e325",
       "cost": {
-        "status": "pending",
-        "reason": "No pricing or full-run cost was supplied in the public submission issues."
+        "status": "gpu-runtime-estimate",
+        "hourly_rate_usd": 1.99,
+        "gpu_count": 1,
+        "hardware": "NVIDIA H100 PCIe 80 GB",
+        "source_url": "https://www.runpod.io/gpu-models/h100",
+        "basis": "Full recorded run duration multiplied by the Runpod Community Cloud reference rate for one H100 PCIe 80 GB.",
+        "assumptions": [
+          "Uses a one-H100 reference configuration for Laya; its actual hardware and API price are unspecified.",
+          "Assumes the GPU is allocated for the entire recorded hosted run window.",
+          "The recorded run window is retained; performance on an H100 has not been measured.",
+          "Reference compute-only estimate; excludes storage, tax and other fees."
+        ]
       }
     }
   ]

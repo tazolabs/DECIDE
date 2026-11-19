@@ -699,10 +699,10 @@
       "input": "audio",
       "correct": 3494,
       "accuracy": 0.7178960345181837,
-      "cost_usd": 7.333952163888889,
+      "cost_usd": 4.065338386111112,
       "latency_ms": 1511.0706800904047,
       "latency_basis": "run-elapsed-per-question",
-      "dbs": 51.05526072231984,
+      "dbs": 57.281435729495996,
       "families": {
         "voice": {
           "correct": 1568,
@@ -735,19 +735,20 @@
       "measurements": {
         "cost": {
           "status": "gpu-runtime-estimate",
-          "source_url": "https://www.runpod.io/gpu-models/h200",
-          "basis": "Full recorded run duration multiplied by the Runpod Community Cloud reference rate for one H200.",
-          "hourly_rate_usd": 3.59,
+          "source_url": "https://www.runpod.io/gpu-models/h100",
+          "basis": "Full recorded run duration multiplied by the Runpod Community Cloud reference rate for one H100 PCIe 80 GB.",
+          "hourly_rate_usd": 1.99,
           "gpu_count": 1,
-          "hardware": "NVIDIA H200 141 GB",
+          "hardware": "NVIDIA H100 PCIe 80 GB",
           "hardware_source_url": "https://github.com/tazolabs/DECIDE/issues/21",
           "assumptions": [
-            "Assumes Turbo used one H200, matching Flash; GPU type is not independently confirmed for Turbo.",
-            "Assumes the GPU is allocated for the entire hosted run window.",
+            "Uses a one-H100 reference configuration for Turbo; its actual GPU type is not independently confirmed.",
+            "Assumes the GPU is allocated for the entire recorded hosted run window.",
+            "The recorded run window is retained; performance on an H100 has not been measured.",
             "Reference compute-only estimate; excludes storage, tax and other fees."
           ],
           "run_hours": 2.0428836111111113,
-          "value_usd": 7.333952163888889
+          "value_usd": 4.065338386111112
         },
         "latency": {
           "status": "run-time-estimate",
@@ -832,10 +833,10 @@
       "input": "audio",
       "correct": 3195,
       "accuracy": 0.65646188617218,
-      "cost_usd": 7.14963358611111,
+      "cost_usd": 3.9631673638888887,
       "latency_ms": 1473.0941031436203,
       "latency_basis": "run-elapsed-per-question",
-      "dbs": 50.024860205021916,
+      "dbs": 56.05754679356336,
       "families": {
         "voice": {
           "correct": 1553,
@@ -868,19 +869,20 @@
       "measurements": {
         "cost": {
           "status": "gpu-runtime-estimate",
-          "source_url": "https://www.runpod.io/gpu-models/h200",
-          "basis": "Full recorded run duration multiplied by the Runpod Community Cloud reference rate for one H200.",
-          "hourly_rate_usd": 3.59,
+          "source_url": "https://www.runpod.io/gpu-models/h100",
+          "basis": "Full recorded run duration multiplied by the Runpod Community Cloud reference rate for one H100 PCIe 80 GB.",
+          "hourly_rate_usd": 1.99,
           "gpu_count": 1,
-          "hardware": "NVIDIA H200 141 GB",
+          "hardware": "NVIDIA H100 PCIe 80 GB",
           "hardware_source_url": "https://github.com/tazolabs/DECIDE/issues/21",
           "assumptions": [
-            "Flash submitter reports one H200.",
-            "Assumes the GPU is allocated for the entire hosted run window.",
+            "Uses a one-H100 reference configuration for cost; the Flash submitter reported running on an H200.",
+            "Assumes the GPU is allocated for the entire recorded hosted run window.",
+            "The recorded run window is retained; performance on an H100 has not been measured.",
             "Reference compute-only estimate; excludes storage, tax and other fees."
           ],
           "run_hours": 1.9915413888888889,
-          "value_usd": 7.14963358611111
+          "value_usd": 3.9631673638888887
         },
         "latency": {
           "status": "run-time-estimate",
@@ -890,6 +892,73 @@
           "completed_at": "2026-11-10T17:38:30.955Z",
           "completion_source": "report.completed_at",
           "elapsed_ms": 7169549,
+          "questions": 4867
+        }
+      }
+    },
+    {
+      "id": "laya-embeddinglabs",
+      "name": "Laya (EmbeddingLabs submission)",
+      "input": "audio",
+      "correct": 525,
+      "accuracy": 0.10786932401890281,
+      "cost_usd": 6.263351980555555,
+      "latency_ms": 2328.063899732895,
+      "latency_basis": "run-elapsed-per-question",
+      "dbs": 26.05440837877438,
+      "families": {
+        "voice": {
+          "correct": 11,
+          "accuracy": 0.005832449628844115
+        },
+        "business": {
+          "correct": 250,
+          "accuracy": 0.1781895937277263
+        },
+        "tools": {
+          "correct": 4,
+          "accuracy": 0.03125
+        },
+        "routing": {
+          "correct": 107,
+          "accuracy": 0.1440107671601615
+        },
+        "turns": {
+          "correct": 83,
+          "accuracy": 0.22074468085106383
+        }
+      },
+      "submission": {
+        "evaluation_id": "a58795ef-79b3-4032-ada3-50ed7956e325",
+        "completed_at": "2026-11-07T18:33:55.598Z",
+        "failed_or_missing": 0,
+        "checked_at": "2026-11-20"
+      },
+      "measurements": {
+        "cost": {
+          "status": "gpu-runtime-estimate",
+          "source_url": "https://www.runpod.io/gpu-models/h100",
+          "basis": "Full recorded run duration multiplied by the Runpod Community Cloud reference rate for one H100 PCIe 80 GB.",
+          "hourly_rate_usd": 1.99,
+          "gpu_count": 1,
+          "hardware": "NVIDIA H100 PCIe 80 GB",
+          "assumptions": [
+            "Uses a one-H100 reference configuration for Laya; its actual hardware and API price are unspecified.",
+            "Assumes the GPU is allocated for the entire recorded hosted run window.",
+            "The recorded run window is retained; performance on an H100 has not been measured.",
+            "Reference compute-only estimate; excludes storage, tax and other fees."
+          ],
+          "run_hours": 3.1474130555555555,
+          "value_usd": 6.263351980555555
+        },
+        "latency": {
+          "status": "run-time-estimate",
+          "value_ms": 2328.063899732895,
+          "basis": "Total elapsed run time divided by all 4,867 questions; includes queueing, pauses, retries and database work.",
+          "started_at": "2026-11-07T15:25:04.911Z",
+          "completed_at": "2026-11-07T18:33:55.598Z",
+          "completion_source": "report.completed_at",
+          "elapsed_ms": 11330687,
           "questions": 4867
         }
       }

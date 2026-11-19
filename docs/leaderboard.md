@@ -14,7 +14,7 @@ Accuracy `A` is a fraction. Cost `C` is the estimated standalone benchmark cost,
 
 The frontier is computed from raw accuracy/cost and latency. The horizontal axis is a normalized latency index, `100 × L/(L + Lmed)`, using the fixed reference median in the snapshot. It is dimensionless, bounded between 0 and 100, and strictly increases with latency; 50 is the median and lower is faster.
 
-The vertical axis is a normalized efficiency index, `100 × E/(E + Emed)`, where `E = accuracy/run cost` and `Emed` is the median efficiency of all models in the published snapshot. Higher is better and 50 is the reference median. This bounded, saturating scale reflects actual measurements: similar efficiencies stay close together, and the leader is not automatically assigned 100. Twice the reference efficiency scores 66.67; half scores 33.33. The index is invariant to the currency unit when the reference is converted too. For the current snapshot, Tazo scores 59.03 and Perceptron scores 70.31.
+The vertical axis is a normalized efficiency index, `100 × E/(E + Emed)`, where `E = accuracy/run cost` and `Emed` is the median efficiency of all models in the published snapshot. Higher is better and 50 is the reference median. This bounded, saturating scale reflects actual measurements: similar efficiencies stay close together, and the leader is not automatically assigned 100. Twice the reference efficiency scores 66.67; half scores 33.33. The index is invariant to the currency unit when the reference is converted too. For the current snapshot, Tazo scores 57.64 and Perceptron scores 69.10.
 
 The favorable quadrant is the top left. These monotonic transformations preserve the raw Pareto dominance relationships: a frontier model is not beaten on both accuracy per dollar and latency, with one strict improvement. A “Pareto Frontier” label follows the longest segment of the line; space for that label is reserved when placing model names.
 
@@ -24,13 +24,12 @@ The voice table displays model names, company names and accuracies without compa
 
 ## Hosted submission estimates
 
-The snapshot includes 23 eligible models: the original 20 plus Nirnaya Flash,
-Nirnaya Turbo and SPEV. See [the source calculations and assumptions](community-submissions.md).
+The snapshot includes 24 eligible models: the original 20 plus Nirnaya Flash,
+Nirnaya Turbo, SPEV and Laya. See [the source calculations and assumptions](community-submissions.md).
 Hosted-submission latency is the recorded full run duration divided by all 4,867
 questions, including evaluator overhead. These values enter the existing score
-and frontier calculations. Nirnaya cost uses full run hours × a one-H200 reference
-rate; the Turbo hardware configuration is an explicit
-assumption. SPEV retains its attributed approximate full-run cost.
+and frontier calculations. Nirnaya and Laya costs use full run hours × a one-H100 PCIe reference
+rate. This is an explicit pricing assumption; recorded run times are unchanged. SPEV retains its attributed approximate full-run cost.
 
 All published entries must have positive cost and latency values. Unpriced
 submissions are excluded rather than shown as pending ranked entries. Model

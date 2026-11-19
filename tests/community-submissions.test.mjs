@@ -16,11 +16,14 @@ test('hosted accuracy includes failed answers in the full denominator',()=>{
   assert.equal(spev.measurements.cost.status,'submitter-estimate');
 });
 
-test('every published entry has a cost, latency and score; unpriced Laya is excluded',()=>{
-  assert.equal(snapshot.models.length,23);
+test('every published entry has a cost, latency and score, including the Laya reference estimate',()=>{
+  assert.equal(snapshot.models.length,24);
   assert(snapshot.models.every(hasCompleteMeasurements));
-  assert(!snapshot.models.some(m=>m.id==='laya-embeddinglabs'));
-  assert.equal(frontierPoints(snapshot.models,snapshot.reference).length,23);
+  const laya=snapshot.models.find(m=>m.id==='laya-embeddinglabs');
+  assert.equal(laya.cost_usd,11330687/3600000*1.99);
+  assert.equal(laya.latency_ms,11330687/4867);
+  assert(laya.measurements.cost.assumptions.some(s=>s.includes('actual hardware and API price are unspecified')));
+  assert.equal(frontierPoints(snapshot.models,snapshot.reference).length,24);
   for(const model of snapshot.models) assert(Math.abs(model.dbs-decisionBalanceScore(model,snapshot.reference))<1e-8);
   for(const value of [0,null,NaN]) {
     const invalid=structuredClone(snapshot);
@@ -45,13 +48,18 @@ test('elapsed timing preserves database milliseconds and includes all 4,867 ques
 });
 
 test('GPU cost uses the entire run window and a documented per-GPU hourly reference',()=>{
-  const cost={status:'gpu-runtime-estimate',hourly_rate_usd:3.59,gpu_count:1,hardware:'H200'};
-  assert.equal(hostedRunCost(cost,{elapsed_ms:7354381}).value_usd,7354381/3600000*3.59);
-  assert.equal(hostedRunCost({...cost,gpu_count:2},{elapsed_ms:3600000}).value_usd,7.18);
+  const cost={status:'gpu-runtime-estimate',hourly_rate_usd:1.99,gpu_count:1,hardware:'H100 PCIe 80 GB'};
+  assert.equal(hostedRunCost(cost,{elapsed_ms:7354381}).value_usd,7354381/3600000*1.99);
+  assert.equal(hostedRunCost({...cost,gpu_count:2},{elapsed_ms:3600000}).value_usd,3.98);
   assert.equal(hostedRunCost({status:'pending'},{elapsed_ms:3600000}),null);
   assert.throws(()=>hostedRunCost({...cost,hourly_rate_usd:0},{elapsed_ms:3600000}));
   const turbo=snapshot.models.find(m=>m.id==='nirnaya-turbo-1-0');
   assert(turbo.measurements.cost.assumptions.some(text=>text.includes('not independently confirmed')));
+  for(const model of snapshot.models.filter(m=>m.measurements?.cost?.status==='gpu-runtime-estimate')) {
+    assert.equal(model.measurements.cost.hourly_rate_usd,1.99);
+    assert.equal(model.measurements.cost.gpu_count,1);
+    assert.equal(model.measurements.cost.hardware,'NVIDIA H100 PCIe 80 GB');
+  }
   assert.equal(turbo.latency_basis,'run-elapsed-per-question');
 });
 
@@ -63,12 +71,12 @@ test('import computes estimates, skips unpriced runs, rejects partial runs and s
       overall:{questions:4867,correct:10,accuracy:10/4867,valid_predictions:4863,missing_or_failed:4},
       by_family:Object.fromEntries(snapshot.families.map(f=>[names[f.id],{questions:f.questions,correct:0}]))}};
   const entry={id:'test-community',model_id:'test-model',name:'Test community',evaluation_id:'test-id',
-    cost:{status:'gpu-runtime-estimate',hourly_rate_usd:3.59,gpu_count:1,api_key:'never-export-metadata-key'}};
+    cost:{status:'gpu-runtime-estimate',hourly_rate_usd:1.99,gpu_count:1,api_key:'never-export-metadata-key'}};
   const result=importHostedSubmissions(snapshot,[job],{checked_at:'2026-11-20',entries:[entry]});
   const model=result.models.at(-1);
   assert.equal(model.accuracy,10/4867);
   assert.equal(model.latency_ms,7200122/4867);
-  assert.equal(model.cost_usd,7200122/3600000*3.59);
+  assert.equal(model.cost_usd,7200122/3600000*1.99);
   assert(!JSON.stringify(result).includes('never-export'));
   assert(Number.isFinite(model.dbs));
   assert.equal(importHostedSubmissions(result,[job],{entries:[entry]}).models.length,result.models.length);

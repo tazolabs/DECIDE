@@ -7,11 +7,11 @@ import { publicLeaderboard } from '../tools/export-leaderboard.mjs';
 const snapshot = JSON.parse(await readFile(new URL('../site/data/leaderboard.json', import.meta.url), 'utf8'));
 const completeModels = snapshot.models.filter(hasCompleteMeasurements);
 
-test('the published snapshot reconciles accuracy and DBS for all 23 priced entries', () => {
+test('the published snapshot reconciles accuracy and DBS for all 24 priced entries', () => {
   assert.equal(validateLeaderboard(snapshot), snapshot);
   assert.equal(snapshot.questions, 4867);
-  assert.equal(snapshot.models.length, 23);
-  assert.equal(completeModels.length, 23);
+  assert.equal(snapshot.models.length, 24);
+  assert.equal(completeModels.length, 24);
   assert.deepEqual(snapshot.families.map(f => f.id), ['voice', 'business', 'tools', 'routing', 'turns']);
   const tazo = snapshot.models.find(model => model.id === 'tazo');
   assert.equal(tazo.name, 'Tazo');
@@ -111,7 +111,7 @@ test('the top-left frontier preserves the raw efficiency–latency dominance rel
   assert.deepEqual(percentileRanks([1]), [50]);
   assert.throws(() => percentileRanks([NaN]));
   const points = frontierPoints(snapshot.models, snapshot.reference);
-  assert.equal(points.length, 23);
+  assert.equal(points.length, 24);
   for (const point of points) {
     assert(point.x >= 0 && point.x <= 100 && point.y >= 0 && point.y <= 100);
     const dominated = points.some(other => other.x <= point.x && other.y >= point.y && (other.x < point.x || other.y > point.y));
@@ -125,7 +125,8 @@ test('the top-left frontier preserves the raw efficiency–latency dominance rel
   assert.equal(tazo.x, Math.min(...points.map(point => point.x)));
   assert(tazo.x < 50 && tazo.y > 50);
   const efficiencies=completeModels.map(m=>m.accuracy/m.cost_usd).sort((a,b)=>a-b);
-  const median=efficiencies[Math.floor(efficiencies.length/2)];
+  const middle=Math.floor(efficiencies.length/2);
+  const median=efficiencies.length%2 ? efficiencies[middle] : (efficiencies[middle-1]+efficiencies[middle])/2;
   assert(Math.abs(tazo.y-normalizedEfficiency(tazo.efficiency,median))<1e-10);
 });
 
