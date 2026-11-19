@@ -1,15 +1,17 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
-import { decisionBalanceScore, frontierPoints, normalizedEfficiency, normalizedLatency, percentileRanks, sortModels, topFamilyModels, validateLeaderboard } from '../site/leaderboard-model.js';
+import { decisionBalanceScore, frontierPoints, hasCompleteMeasurements, normalizedEfficiency, normalizedLatency, percentileRanks, sortModels, topFamilyModels, validateLeaderboard } from '../site/leaderboard-model.js';
 import { publicLeaderboard } from '../tools/export-leaderboard.mjs';
 
 const snapshot = JSON.parse(await readFile(new URL('../site/data/leaderboard.json', import.meta.url), 'utf8'));
+const completeModels = snapshot.models.filter(hasCompleteMeasurements);
 
-test('the published snapshot reconciles accuracy and DBS for all 20 models', () => {
+test('the published snapshot reconciles 24 accuracies and the DBS values with complete measurements', () => {
   assert.equal(validateLeaderboard(snapshot), snapshot);
   assert.equal(snapshot.questions, 4867);
-  assert.equal(snapshot.models.length, 20);
+  assert.equal(snapshot.models.length, 24);
+  assert.equal(completeModels.length, 20);
   assert.deepEqual(snapshot.families.map(f => f.id), ['voice', 'business', 'tools', 'routing', 'turns']);
   const tazo = snapshot.models.find(model => model.id === 'tazo');
   assert.equal(tazo.name, 'Tazo');
@@ -17,7 +19,8 @@ test('the published snapshot reconciles accuracy and DBS for all 20 models', () 
   assert(Math.abs(tazo.dbs - 67.58107493670228) < 1e-9);
   for (const model of snapshot.models) {
     assert.equal(model.accuracy, model.correct / snapshot.questions);
-    assert(Math.abs(decisionBalanceScore(model, snapshot.reference) - model.dbs) < 1e-8);
+    if(hasCompleteMeasurements(model)) assert(Math.abs(decisionBalanceScore(model, snapshot.reference) - model.dbs) < 1e-8);
+    else assert.equal(model.dbs,null);
   }
 });
 
@@ -30,16 +33,16 @@ test('all three table sort modes use the requested direction without mutating th
   assert.equal(accuracy[0].name, 'Gemini 2.5 Flash');
   assert.equal(latency[0].id, 'tazo');
   for (let i = 1; i < snapshot.models.length; i++) {
-    assert(dbs[i - 1].dbs >= dbs[i].dbs);
+    assert(dbs[i].dbs === null || dbs[i - 1].dbs >= dbs[i].dbs);
     assert(accuracy[i - 1].accuracy >= accuracy[i].accuracy);
-    assert(latency[i - 1].latency_ms <= latency[i].latency_ms);
+    assert(latency[i].latency_ms === null || latency[i - 1].latency_ms <= latency[i].latency_ms);
   }
   assert.deepEqual(snapshot.models.map(m => m.id), original);
   assert.throws(() => sortModels(snapshot.models, 'other'));
 });
 
 test('DBS does not depend on currency or time units', () => {
-  for (const model of snapshot.models) {
+  for (const model of completeModels) {
     const transformed = { ...model, cost_usd: model.cost_usd * 100, latency_ms: model.latency_ms / 1000 };
     const reference = { cost_usd: snapshot.reference.cost_usd * 100, latency_ms: snapshot.reference.latency_ms / 1000 };
     assert(Math.abs(decisionBalanceScore(transformed, reference) - model.dbs) < 1e-8);
@@ -52,9 +55,9 @@ test('family rankings support the top-five voice table and use DBS as a determin
     assert.equal(top.length, 3);
     for (let i = 1; i < top.length; i++) assert(top[i - 1].families[family.id].accuracy >= top[i].families[family.id].accuracy);
   }
-  assert.equal(topFamilyModels(snapshot.models, 'voice')[0].id, 'tazo');
+  assert.equal(topFamilyModels(snapshot.models, 'voice')[0].id, 'nirnaya-turbo-1-0');
   assert.deepEqual(topFamilyModels(snapshot.models, 'voice', 5).map(model => model.id),
-    ['tazo', 'perceptron-mk1-5', 'gpt-realtime-2-1', 'qwen2-5-omni-3b', 'gemini-2-5-flash']);
+    ['nirnaya-turbo-1-0', 'tazo', 'perceptron-mk1-5', 'nirnaya-flash-1-0', 'gpt-realtime-2-1']);
   const tiedTurnModels = snapshot.models.filter(m => m.name === 'Gemini 2.5 Flash' || m.name === 'Gemini 2.5 Pro');
   assert.equal(tiedTurnModels[0].families.turns.correct, tiedTurnModels[1].families.turns.correct);
   assert.equal(topFamilyModels(snapshot.models, 'turns')[2].name, 'Gemini 2.5 Flash');
@@ -63,7 +66,7 @@ test('family rankings support the top-five voice table and use DBS as a determin
 test('normalized latency is bounded, monotonic, median-centered and independent of time units', () => {
   const reference = snapshot.reference.latency_ms;
   assert.equal(normalizedLatency(reference, reference), 50);
-  const values = snapshot.models.map(model => model.latency_ms).sort((a, b) => a - b);
+  const values = completeModels.map(model => model.latency_ms).sort((a, b) => a - b);
   values.forEach((value, i) => {
     const normalized = normalizedLatency(value, reference);
     assert(normalized > 0 && normalized < 100);
@@ -79,7 +82,7 @@ test('the efficiency index reflects measured values, compresses large ratios and
   assert.equal(normalizedEfficiency(1, 1), 50);
   assert.equal(normalizedEfficiency(4, 1), 80);
   assert(normalizedEfficiency(1.001, 1) - normalizedEfficiency(1, 1) < .03);
-  const values = snapshot.models.map(model => model.accuracy / model.cost_usd).sort((a, b) => a - b);
+  const values = completeModels.map(model => model.accuracy / model.cost_usd).sort((a, b) => a - b);
   const reference = (values[9] + values[10]) / 2;
   values.forEach((value, i) => {
     const normalized = normalizedEfficiency(value, reference);
@@ -140,7 +143,7 @@ test('the public export allowlists aggregates and excludes private analysis fiel
     questions: snapshot.questions,
     normalization: { cost_reference_usd: snapshot.reference.cost_usd, latency_reference_seconds: snapshot.reference.latency_ms / 1000 },
     secret: 'must-not-be-exported',
-    models: snapshot.models.map(model => ({
+    models: completeModels.map(model => ({
       model: model.name, uses_stt: model.input === 'stt-text', provider: 'test',
       accuracy: model.accuracy, cost: model.cost_usd, latency: model.latency_ms / 1000, balance_score: model.dbs,
       source: '/private/local/path', clip_transcript: 'must-not-be-exported',
@@ -152,6 +155,7 @@ test('the public export allowlists aggregates and excludes private analysis fiel
   const exported = publicLeaderboard(source);
   assert.equal(exported.models.length, 20);
   assert.equal(exported.models[0].latency_ms, source.models[0].latency * 1000);
+  assert.equal(publicLeaderboard({...source,models:source.models.slice(0,2)}).models.length,2);
   for (const forbidden of ['must-not-be-exported', '/private/local/path', 'clip_transcript', 'TAZO_BEARER_TOKEN']) {
     assert(!JSON.stringify(exported).includes(forbidden));
   }

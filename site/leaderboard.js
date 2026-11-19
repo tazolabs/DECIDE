@@ -1,4 +1,4 @@
-import { frontierPoints, sortModels, topFamilyModels, validateLeaderboard } from './leaderboard-model.js';
+import { frontierPoints, hasCompleteMeasurements, sortModels, topFamilyModels, validateLeaderboard } from './leaderboard-model.js';
 
 const percent = value => `${(100 * value).toFixed(2)}%`;
 const money = value => `$${value.toFixed(2)}`;
@@ -25,14 +25,25 @@ function showTable(data, sort = 'dbs') {
   const sorted = sortModels(data.models, sort);
   sorted.forEach((model, index) => {
     const tr = node('tr', model.id === 'tazo' ? 'model-tazo' : '');
-    tr.append(node('td', 'rank-column', String(index + 1).padStart(2, '0')));
+    const rankMetric = sort === 'latency' ? 'latency_ms' : sort;
+    tr.append(node('td', 'rank-column', model[rankMetric] === null ? '—' : String(index + 1).padStart(2, '0')));
     const name = node('th', 'model-name');
     name.scope = 'row';
-    name.append(node('span', '', model.name), node('small', '', model.input === 'audio' ? 'Direct audio' : 'STT + text'));
+    name.append(node('span', '', model.name), node('small', '', model.input === 'audio'
+      ? model.submission ? 'Hosted audio submission' : 'Direct audio' : 'STT + text'));
     tr.append(name);
-    for (const [key, value] of [['accuracy', percent(model.accuracy)], ['cost', money(model.cost_usd)],
-      ['latency', latency(model.latency_ms)], ['dbs', model.dbs.toFixed(2)]]) {
-      tr.append(node('td', `metric-column ${key === sort ? 'sorted-metric' : ''} ${key === 'dbs' ? 'dbs-column' : ''}`, value));
+    for (const [key, value] of [['accuracy', percent(model.accuracy)], ['cost', model.cost_usd === null ? 'Pending' : money(model.cost_usd)],
+      ['latency', model.latency_ms === null ? 'Pending' : latency(model.latency_ms)], ['dbs', model.dbs === null ? 'Pending' : model.dbs.toFixed(2)]]) {
+      const cell = node('td', `metric-column ${key === sort ? 'sorted-metric' : ''} ${key === 'dbs' ? 'dbs-column' : ''}`, value);
+      if (key === 'cost' && model.measurements?.cost?.status === 'submitter-estimate') {
+        const source = node('a', 'metric-detail', 'Submitter estimate');
+        source.href = model.measurements.cost.source_url;
+        cell.append(source);
+      }
+      const reported = model.measurements?.latency?.reported;
+      if (key === 'latency' && reported) cell.append(node('small', 'metric-detail',
+        `${reported.value_ms} ms ${reported.statistic === 'median' ? 'median' : 'mean'} · server-reported`));
+      tr.append(cell);
     }
     body.append(tr);
   });
@@ -50,6 +61,7 @@ const voiceCompanies = {
   'gpt-realtime-2-1': 'OpenAI',
   'qwen2-5-omni-3b': 'Alibaba · Qwen',
   'gemini-2-5-flash': 'Google',
+  spev: 'Sprag',
 };
 
 function showVoiceLeaders(data) {
@@ -60,12 +72,17 @@ function showVoiceLeaders(data) {
     row.append(node('td', 'rank-column', String(index + 1).padStart(2, '0')));
     const heading = node('th', 'model-name');
     heading.scope = 'row';
-    const company = voiceCompanies[model.id];
+    const company = model.company || voiceCompanies[model.id];
     heading.append(node('span', '', model.name));
     if (company) heading.append(node('small', '', company));
     row.append(heading, node('td', 'metric-column voice-accuracy', percent(model.families.voice.accuracy)));
     body.append(row);
   });
+  const leader = topFamilyModels(data.models, 'voice', 1)[0];
+  document.querySelector('#voice-leader-accuracy').textContent = percent(leader.families.voice.accuracy);
+  document.querySelector('#voice-leader-name').textContent = `#1 · ${leader.name}`;
+  document.querySelector('#voice-title').textContent = 'Voice-based decisions. Current leaders.';
+  document.querySelector('#voice-brand').hidden = leader.id !== 'tazo';
 }
 
 // Keep every label legible without moving its data point. Leader lines connect displaced names.
@@ -113,7 +130,7 @@ function showFrontier(data) {
   const x = value => 130 + value * 7.5;
   const y = value => 650 - value * 5.6;
   svg.replaceChildren(svgNode('title', {}, 'DECIDE efficiency–latency Pareto frontier'),
-    svgNode('desc', {}, 'All 20 evaluated models. Lower normalized latency is better on the horizontal axis. Higher normalized efficiency is better on the vertical axis. Both indices use a median-centered scale from 0 to 100. The top-left quadrant is favorable. Every model is labelled; focus or activate a point for its raw metrics.'));
+    svgNode('desc', {}, `${points.length} models with complete cost and mean-latency measurements. Lower normalized latency is better on the horizontal axis. Higher normalized efficiency is better on the vertical axis. Both indices use a median-centered scale from 0 to 100. The top-left quadrant is favorable. Every model is labelled; focus or activate a point for its raw metrics.`));
   svg.append(svgNode('rect', { x: x(0), y: y(100), width: 375, height: 280, class: 'frontier-favorable' }));
   for (const value of [0, 25, 50, 75, 100]) {
     svg.append(svgNode('line', { x1: x(value), x2: x(value), y1: y(0), y2: y(100), class: value === 50 ? 'frontier-midpoint' : 'frontier-grid' }),
@@ -221,6 +238,10 @@ async function init() {
     const response = await fetch('/data/leaderboard.json');
     if (!response.ok) throw new Error('Leaderboard unavailable');
     const data = validateLeaderboard(await response.json());
+    document.querySelector('.leaderboard-meta').textContent = `${data.models.length} models · ${data.questions.toLocaleString('en-US')} decision questions`;
+    const pending = data.models.filter(model => !hasCompleteMeasurements(model)).length;
+    document.querySelector('#pending-measurements').hidden = !pending;
+    document.querySelector('#pending-measurements').textContent = `${pending} submissions await cost or mean-latency measurements. Their accuracy is included; DBS and the frontier require both measurements.`;
     showTable(data);
     document.querySelectorAll('[data-sort]').forEach(button => {
       button.disabled = false;
@@ -230,8 +251,6 @@ async function init() {
     document.querySelectorAll('[data-leaderboard-content]').forEach(section => section.hidden = false);
     await document.fonts.ready;
     showFrontier(data);
-    const tazo = data.models.find(model => model.id === 'tazo');
-    document.querySelector('#tazo-voice-accuracy').textContent = percent(tazo.families.voice.accuracy);
     document.querySelector('#score-references').textContent = `A = accuracy (0–1), C = run cost, L = mean latency. Fixed reference medians: Cₘ = $${data.reference.cost_usd.toFixed(4)}; Lₘ = ${(data.reference.latency_ms / 1000).toFixed(3)} s.`;
     document.querySelector('#leaderboard-loading').hidden = true;
   } catch {

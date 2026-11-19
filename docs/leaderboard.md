@@ -22,6 +22,17 @@ Every model is labelled on the chart. Labels may move for legibility, with leade
 
 The voice table displays model names, company names and accuracies without company logos.
 
+## Hosted submissions and incomplete measurements
+
+The snapshot now includes 24 models: the original 20 and four verified hosted
+submissions. See [community submission evidence and timing instructions](community-submissions.md).
+An unavailable cost or client mean is `null`, with an explicit pending status.
+Such entries participate in accuracy and voice rankings but have no DBS or
+frontier point until both measurements are documented. Reported server means or
+medians remain attributed secondary details, not substitute client measurements.
+The voice winner and model counts are derived from the snapshot. Original DBS
+normalization constants remain fixed when entries are added.
+
 To refresh from an approved internal aggregate report:
 
 ```bash

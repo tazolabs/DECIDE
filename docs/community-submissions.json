@@ -1,0 +1,56 @@
+{
+  "checked_at": "2026-11-20",
+  "entries": [
+    {
+      "id": "nirnaya-turbo-1-0",
+      "name": "Nirnaya Turbo 1.0",
+      "model_id": "nirnaya-turbo-1.0",
+      "evaluation_id": "e8ee7984-d482-4768-8b6f-312dca53775e",
+      "source_url": "https://github.com/tazolabs/DECIDE/issues/21#issuecomment-6778380819",
+      "cost": { "status": "pending", "reason": "Self-hosted; full-run cost has not been supplied or measured." },
+      "latency": {
+        "status": "pending", "reason": "The submitted temporary tunnel no longer resolves; 500-sample client measurement is pending.",
+        "reported": { "value_ms": 243, "statistic": "mean", "scope": "server", "source_url": "https://github.com/tazolabs/DECIDE/issues/21#issuecomment-6778380819" }
+      }
+    },
+    {
+      "id": "spev",
+      "name": "SPEV",
+      "company": "Sprag",
+      "model_id": "spev",
+      "evaluation_id": "143e137b-014f-4e38-844e-c41a9a25ab83",
+      "source_url": "https://github.com/tazolabs/DECIDE/issues/20",
+      "cost": {
+        "status": "submitter-estimate", "value_usd": 1.5,
+        "source_url": "https://github.com/tazolabs/DECIDE/issues/20",
+        "basis": "Submitter estimates approximately $1.50 for the full 4,867-question run; this is not an invoice or a reconstruction of token usage.",
+        "rates": { "audio_input_usd_per_million_tokens": 2, "text_input_usd_per_million_tokens": 0.09, "output_usd": 0 },
+        "rate_source_url": "https://sprag.ai/spev"
+      },
+      "latency": {
+        "status": "pending", "reason": "The saved evaluation endpoint returns HTTP 404; a restored endpoint and API access are needed for 500-sample timing.",
+        "reported": { "value_ms": 300, "statistic": "mean", "scope": "server", "source_url": "https://github.com/tazolabs/DECIDE/issues/20" }
+      }
+    },
+    {
+      "id": "nirnaya-flash-1-0",
+      "name": "Nirnaya Flash 1.0",
+      "model_id": "nirnaya-flash-1.0",
+      "evaluation_id": "a282dd7f-98d4-4105-8a01-2a54778d6ecf",
+      "source_url": "https://github.com/tazolabs/DECIDE/issues/21",
+      "cost": { "status": "pending", "reason": "Self-hosted on one H200; a median request time alone is insufficient to estimate total billed GPU time." },
+      "latency": {
+        "status": "pending", "reason": "The submitted temporary tunnel no longer resolves; 500-sample client measurement is pending.",
+        "reported": { "value_ms": 180, "statistic": "median", "scope": "same-machine HTTP", "source_url": "https://github.com/tazolabs/DECIDE/issues/21" }
+      }
+    },
+    {
+      "id": "laya-embeddinglabs",
+      "name": "Laya (EmbeddingLabs submission)",
+      "model_id": "laya-embeddinglabs",
+      "evaluation_id": "a58795ef-79b3-4032-ada3-50ed7956e325",
+      "cost": { "status": "pending", "reason": "No pricing or full-run cost was supplied in the public submission issues." },
+      "latency": { "status": "pending", "reason": "The saved endpoint returns HTTP 404; client timing requires a restored endpoint and API access." }
+    }
+  ]
+}

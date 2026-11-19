@@ -13,12 +13,25 @@ export function sortModels(models, sort = 'dbs') {
   if (!['dbs', 'accuracy', 'latency'].includes(sort)) throw new Error('Unknown leaderboard sort');
   const field = sort === 'latency' ? 'latency_ms' : sort;
   const direction = sort === 'latency' ? 1 : -1;
-  return [...models].sort((a, b) => direction * (a[field] - b[field]) || b.dbs - a.dbs || a.name.localeCompare(b.name));
+  return [...models].sort((a, b) => compareMetric(a[field], b[field], direction)
+    || compareMetric(a.dbs, b.dbs, -1) || a.name.localeCompare(b.name));
+}
+
+function compareMetric(a, b, direction) {
+  if (a === null && b === null) return 0;
+  if (a === null) return 1;
+  if (b === null) return -1;
+  return direction * (a - b);
+}
+
+export function hasCompleteMeasurements(model) {
+  return Number.isFinite(model.cost_usd) && model.cost_usd > 0
+    && Number.isFinite(model.latency_ms) && model.latency_ms > 0;
 }
 
 export function topFamilyModels(models, family, limit = 3) {
   return [...models].sort((a, b) => b.families[family].accuracy - a.families[family].accuracy
-    || b.dbs - a.dbs || a.name.localeCompare(b.name)).slice(0, limit);
+    || compareMetric(a.dbs, b.dbs, -1) || a.name.localeCompare(b.name)).slice(0, limit);
 }
 
 export function percentileRanks(values, higherIsBetter = true) {
@@ -51,6 +64,8 @@ export function normalizedEfficiency(efficiency, reference) {
 }
 
 export function frontierPoints(models, reference) {
+  models = models.filter(hasCompleteMeasurements);
+  if (!models.length) return [];
   const efficiency = models.map(model => model.accuracy / model.cost_usd);
   const ordered = [...efficiency].sort((a, b) => a - b);
   const middle = Math.floor(ordered.length / 2);
@@ -74,8 +89,14 @@ export function validateLeaderboard(data) {
     if (!model.id || ids.has(model.id) || typeof model.name !== 'string' || !model.name.trim()
         || !['audio', 'stt-text'].includes(model.input) || !Number.isInteger(model.correct)
         || model.correct < 0 || model.correct > data.questions
+        || !Number.isFinite(model.accuracy)
         || Math.abs(model.accuracy - model.correct / data.questions) > 1e-12
-        || !Number.isFinite(model.dbs) || Math.abs(decisionBalanceScore(model, data.reference) - model.dbs) > 1e-8) {
+        || !['cost_usd', 'latency_ms'].every(key => model[key] === null
+          ? model.measurements?.[key === 'cost_usd' ? 'cost' : 'latency']?.status === 'pending'
+          : Number.isFinite(model[key]) && model[key] > 0)
+        || (hasCompleteMeasurements(model)
+          ? !Number.isFinite(model.dbs) || Math.abs(decisionBalanceScore(model, data.reference) - model.dbs) > 1e-8
+          : model.dbs !== null)) {
       throw new Error('Invalid model metrics');
     }
     ids.add(model.id);
