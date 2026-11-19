@@ -1,4 +1,4 @@
-import { frontierPoints, hasCompleteMeasurements, sortModels, topFamilyModels, validateLeaderboard } from './leaderboard-model.js';
+import { frontierPoints, sortModels, topFamilyModels, validateLeaderboard } from './leaderboard-model.js';
 
 const percent = value => `${(100 * value).toFixed(2)}%`;
 const money = value => `$${value.toFixed(2)}`;
@@ -25,24 +25,26 @@ function showTable(data, sort = 'dbs') {
   const sorted = sortModels(data.models, sort);
   sorted.forEach((model, index) => {
     const tr = node('tr', model.id === 'tazo' ? 'model-tazo' : '');
-    const rankMetric = sort === 'latency' ? 'latency_ms' : sort;
-    tr.append(node('td', 'rank-column', model[rankMetric] === null ? '—' : String(index + 1).padStart(2, '0')));
+    tr.append(node('td', 'rank-column', String(index + 1).padStart(2, '0')));
     const name = node('th', 'model-name');
     name.scope = 'row';
     name.append(node('span', '', model.name), node('small', '', model.input === 'audio'
       ? model.submission ? 'Hosted audio submission' : 'Direct audio' : 'STT + text'));
     tr.append(name);
-    for (const [key, value] of [['accuracy', percent(model.accuracy)], ['cost', model.cost_usd === null ? 'Pending' : money(model.cost_usd)],
-      ['latency', model.latency_ms === null ? 'Pending' : latency(model.latency_ms)], ['dbs', model.dbs === null ? 'Pending' : model.dbs.toFixed(2)]]) {
+    for (const [key, value] of [['accuracy', percent(model.accuracy)], ['cost', money(model.cost_usd)],
+      ['latency', latency(model.latency_ms)], ['dbs', model.dbs.toFixed(2)]]) {
       const cell = node('td', `metric-column ${key === sort ? 'sorted-metric' : ''} ${key === 'dbs' ? 'dbs-column' : ''}`, value);
-      if (key === 'cost' && model.measurements?.cost?.status === 'submitter-estimate') {
-        const source = node('a', 'metric-detail', 'Submitter estimate');
+      if (key === 'cost' && ['submitter-estimate','gpu-runtime-estimate'].includes(model.measurements?.cost?.status)) {
+        const source = node('a', 'metric-detail', model.measurements.cost.status === 'gpu-runtime-estimate' ? 'GPU run estimate' : 'Cost estimate');
         source.href = model.measurements.cost.source_url;
+        source.title = [model.measurements.cost.basis, ...(model.measurements.cost.assumptions || [])].filter(Boolean).join(' ');
         cell.append(source);
       }
-      const reported = model.measurements?.latency?.reported;
-      if (key === 'latency' && reported) cell.append(node('small', 'metric-detail',
-        `${reported.value_ms} ms ${reported.statistic === 'median' ? 'median' : 'mean'} · server-reported`));
+      if (key === 'latency' && model.latency_basis === 'run-elapsed-per-question') {
+        const method=node('small','metric-detail','Run time ÷ 4,867');
+        method.title=model.measurements.latency.basis;
+        cell.append(method);
+      }
       tr.append(cell);
     }
     body.append(tr);
@@ -130,7 +132,7 @@ function showFrontier(data) {
   const x = value => 130 + value * 7.5;
   const y = value => 650 - value * 5.6;
   svg.replaceChildren(svgNode('title', {}, 'DECIDE efficiency–latency Pareto frontier'),
-    svgNode('desc', {}, `${points.length} models with complete cost and mean-latency measurements. Lower normalized latency is better on the horizontal axis. Higher normalized efficiency is better on the vertical axis. Both indices use a median-centered scale from 0 to 100. The top-left quadrant is favorable. Every model is labelled; focus or activate a point for its raw metrics.`));
+    svgNode('desc', {}, `${points.length} models with complete cost and latency estimates. Lower normalized latency is better on the horizontal axis. Higher normalized efficiency is better on the vertical axis. Both indices use a median-centered scale from 0 to 100. The top-left quadrant is favorable. Every model is labelled; focus or activate a point for its raw metrics.`));
   svg.append(svgNode('rect', { x: x(0), y: y(100), width: 375, height: 280, class: 'frontier-favorable' }));
   for (const value of [0, 25, 50, 75, 100]) {
     svg.append(svgNode('line', { x1: x(value), x2: x(value), y1: y(0), y2: y(100), class: value === 50 ? 'frontier-midpoint' : 'frontier-grid' }),
@@ -188,7 +190,7 @@ function showFrontier(data) {
   function showTooltip(point, group, event) {
     tooltip.replaceChildren(node('strong', '', point.name));
     const metrics = node('dl');
-    for (const [name, value] of [['Accuracy', percent(point.accuracy)], ['Run cost', money(point.cost_usd)], ['Mean latency', latency(point.latency_ms)]]) {
+    for (const [name, value] of [['Accuracy', percent(point.accuracy)], ['Run cost', money(point.cost_usd)], ['Latency', latency(point.latency_ms)]]) {
       metrics.append(node('dt', '', name), node('dd', '', value));
     }
     tooltip.append(metrics);
@@ -205,7 +207,7 @@ function showFrontier(data) {
   const drawingOrder = [...points].sort((a, b) => Number(a.id === 'tazo') - Number(b.id === 'tazo'));
   drawingOrder.forEach(point => {
     const isTazo = point.id === 'tazo';
-    const label = `${point.name}: ${percent(point.accuracy)} accuracy, ${money(point.cost_usd)} run cost, ${latency(point.latency_ms)} mean latency${point.frontier ? ', on the frontier' : ''}.`;
+    const label = `${point.name}: ${percent(point.accuracy)} accuracy, ${money(point.cost_usd)} run cost, ${latency(point.latency_ms)} latency${point.frontier ? ', on the frontier' : ''}.`;
     const group = svgNode('g', { class: `frontier-point ${isTazo ? 'frontier-tazo' : ''} ${point.frontier ? 'on-frontier' : ''} ${point.input === 'stt-text' ? 'point-text' : ''}`,
       transform: `translate(${x(point.x)} ${y(point.y)})`, tabindex: '0', role: 'button', 'aria-label': label, 'data-model': point.id });
     group.append(svgNode('circle', { r: 18, class: 'point-hit' }));
@@ -239,9 +241,6 @@ async function init() {
     if (!response.ok) throw new Error('Leaderboard unavailable');
     const data = validateLeaderboard(await response.json());
     document.querySelector('.leaderboard-meta').textContent = `${data.models.length} models · ${data.questions.toLocaleString('en-US')} decision questions`;
-    const pending = data.models.filter(model => !hasCompleteMeasurements(model)).length;
-    document.querySelector('#pending-measurements').hidden = !pending;
-    document.querySelector('#pending-measurements').textContent = `${pending} submissions await cost or mean-latency measurements. Their accuracy is included; DBS and the frontier require both measurements.`;
     showTable(data);
     document.querySelectorAll('[data-sort]').forEach(button => {
       button.disabled = false;
@@ -251,7 +250,7 @@ async function init() {
     document.querySelectorAll('[data-leaderboard-content]').forEach(section => section.hidden = false);
     await document.fonts.ready;
     showFrontier(data);
-    document.querySelector('#score-references').textContent = `A = accuracy (0–1), C = run cost, L = mean latency. Fixed reference medians: Cₘ = $${data.reference.cost_usd.toFixed(4)}; Lₘ = ${(data.reference.latency_ms / 1000).toFixed(3)} s.`;
+    document.querySelector('#score-references').textContent = `A = accuracy (0–1), C = run cost, L = latency estimate. Fixed reference medians: Cₘ = $${data.reference.cost_usd.toFixed(4)}; Lₘ = ${(data.reference.latency_ms / 1000).toFixed(3)} s.`;
     document.querySelector('#leaderboard-loading').hidden = true;
   } catch {
     document.querySelector('#leaderboard-loading').textContent = 'The leaderboard could not be loaded. Please refresh to try again.';

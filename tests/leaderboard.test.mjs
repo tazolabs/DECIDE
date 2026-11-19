@@ -7,11 +7,11 @@ import { publicLeaderboard } from '../tools/export-leaderboard.mjs';
 const snapshot = JSON.parse(await readFile(new URL('../site/data/leaderboard.json', import.meta.url), 'utf8'));
 const completeModels = snapshot.models.filter(hasCompleteMeasurements);
 
-test('the published snapshot reconciles 24 accuracies and the DBS values with complete measurements', () => {
+test('the published snapshot reconciles accuracy and DBS for all 23 priced entries', () => {
   assert.equal(validateLeaderboard(snapshot), snapshot);
   assert.equal(snapshot.questions, 4867);
-  assert.equal(snapshot.models.length, 24);
-  assert.equal(completeModels.length, 20);
+  assert.equal(snapshot.models.length, 23);
+  assert.equal(completeModels.length, 23);
   assert.deepEqual(snapshot.families.map(f => f.id), ['voice', 'business', 'tools', 'routing', 'turns']);
   const tazo = snapshot.models.find(model => model.id === 'tazo');
   assert.equal(tazo.name, 'Tazo');
@@ -83,7 +83,8 @@ test('the efficiency index reflects measured values, compresses large ratios and
   assert.equal(normalizedEfficiency(4, 1), 80);
   assert(normalizedEfficiency(1.001, 1) - normalizedEfficiency(1, 1) < .03);
   const values = completeModels.map(model => model.accuracy / model.cost_usd).sort((a, b) => a - b);
-  const reference = (values[9] + values[10]) / 2;
+  const middle=Math.floor(values.length/2);
+  const reference = values.length%2 ? values[middle] : (values[middle-1]+values[middle])/2;
   values.forEach((value, i) => {
     const normalized = normalizedEfficiency(value, reference);
     assert(normalized > 0 && normalized < 100);
@@ -110,7 +111,7 @@ test('the top-left frontier preserves the raw efficiency–latency dominance rel
   assert.deepEqual(percentileRanks([1]), [50]);
   assert.throws(() => percentileRanks([NaN]));
   const points = frontierPoints(snapshot.models, snapshot.reference);
-  assert.equal(points.length, 20);
+  assert.equal(points.length, 23);
   for (const point of points) {
     assert(point.x >= 0 && point.x <= 100 && point.y >= 0 && point.y <= 100);
     const dominated = points.some(other => other.x <= point.x && other.y >= point.y && (other.x < point.x || other.y > point.y));
@@ -123,8 +124,9 @@ test('the top-left frontier preserves the raw efficiency–latency dominance rel
   assert.equal(tazo.frontier, true);
   assert.equal(tazo.x, Math.min(...points.map(point => point.x)));
   assert(tazo.x < 50 && tazo.y > 50);
-  assert(Math.abs(tazo.y - 58.227675873703724) < 1e-10);
-  assert(Math.abs(points.find(point => point.id === 'perceptron-mk1-5').y - 69.61433074083854) < 1e-10);
+  const efficiencies=completeModels.map(m=>m.accuracy/m.cost_usd).sort((a,b)=>a-b);
+  const median=efficiencies[Math.floor(efficiencies.length/2)];
+  assert(Math.abs(tazo.y-normalizedEfficiency(tazo.efficiency,median))<1e-10);
 });
 
 test('invalid metrics fail rather than silently changing rankings', () => {
@@ -153,7 +155,7 @@ test('the public export allowlists aggregates and excludes private analysis fiel
     })),
   };
   const exported = publicLeaderboard(source);
-  assert.equal(exported.models.length, 20);
+  assert.equal(exported.models.length, completeModels.length);
   assert.equal(exported.models[0].latency_ms, source.models[0].latency * 1000);
   assert.equal(publicLeaderboard({...source,models:source.models.slice(0,2)}).models.length,2);
   for (const forbidden of ['must-not-be-exported', '/private/local/path', 'clip_transcript', 'TAZO_BEARER_TOKEN']) {

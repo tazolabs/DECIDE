@@ -699,10 +699,10 @@
       "input": "audio",
       "correct": 3494,
       "accuracy": 0.7178960345181837,
-      "cost_usd": null,
-      "latency_ms": null,
-      "latency_basis": "pending",
-      "dbs": null,
+      "cost_usd": 7.333952163888889,
+      "latency_ms": 1511.0706800904047,
+      "latency_basis": "run-elapsed-per-question",
+      "dbs": 51.05526072231984,
       "families": {
         "voice": {
           "correct": 1568,
@@ -734,18 +734,30 @@
       },
       "measurements": {
         "cost": {
-          "status": "pending",
-          "reason": "Self-hosted; full-run cost has not been supplied or measured."
+          "status": "gpu-runtime-estimate",
+          "source_url": "https://www.runpod.io/gpu-models/h200",
+          "basis": "Full recorded run duration multiplied by the Runpod Community Cloud reference rate for one H200.",
+          "hourly_rate_usd": 3.59,
+          "gpu_count": 1,
+          "hardware": "NVIDIA H200 141 GB",
+          "hardware_source_url": "https://github.com/tazolabs/DECIDE/issues/21",
+          "assumptions": [
+            "Assumes Turbo used one H200, matching Flash; GPU type is not independently confirmed for Turbo.",
+            "Assumes the GPU is allocated for the entire hosted run window.",
+            "Reference compute-only estimate; excludes storage, tax and other fees."
+          ],
+          "run_hours": 2.0428836111111113,
+          "value_usd": 7.333952163888889
         },
         "latency": {
-          "status": "pending",
-          "reason": "The submitted temporary tunnel no longer resolves; 500-sample client measurement is pending.",
-          "reported": {
-            "value_ms": 243,
-            "statistic": "mean",
-            "scope": "server",
-            "source_url": "https://github.com/tazolabs/DECIDE/issues/21#issuecomment-6778380819"
-          }
+          "status": "run-time-estimate",
+          "value_ms": 1511.0706800904047,
+          "basis": "Total elapsed run time divided by all 4,867 questions; includes queueing, pauses, retries and database work.",
+          "started_at": "2026-11-10T18:00:41.142Z",
+          "completed_at": "2026-11-10T20:03:15.523Z",
+          "completion_source": "report.completed_at",
+          "elapsed_ms": 7354381,
+          "questions": 4867
         }
       }
     },
@@ -756,9 +768,9 @@
       "correct": 3458,
       "accuracy": 0.7104992808711732,
       "cost_usd": 1.5,
-      "latency_ms": null,
-      "latency_basis": "pending",
-      "dbs": null,
+      "latency_ms": 1579.4575713992192,
+      "latency_basis": "run-elapsed-per-question",
+      "dbs": 64.58141121077009,
       "families": {
         "voice": {
           "correct": 1520,
@@ -802,14 +814,14 @@
           }
         },
         "latency": {
-          "status": "pending",
-          "reason": "The saved evaluation endpoint returns HTTP 404; a restored endpoint and API access are needed for 500-sample timing.",
-          "reported": {
-            "value_ms": 300,
-            "statistic": "mean",
-            "scope": "server",
-            "source_url": "https://github.com/tazolabs/DECIDE/issues/20"
-          }
+          "status": "run-time-estimate",
+          "value_ms": 1579.4575713992192,
+          "basis": "Total elapsed run time divided by all 4,867 questions; includes queueing, pauses, retries and database work.",
+          "started_at": "2026-11-08T01:51:03.085Z",
+          "completed_at": "2026-11-08T03:59:10.305Z",
+          "completion_source": "report.completed_at",
+          "elapsed_ms": 7687220,
+          "questions": 4867
         }
       },
       "company": "Sprag"
@@ -820,10 +832,10 @@
       "input": "audio",
       "correct": 3195,
       "accuracy": 0.65646188617218,
-      "cost_usd": null,
-      "latency_ms": null,
-      "latency_basis": "pending",
-      "dbs": null,
+      "cost_usd": 7.14963358611111,
+      "latency_ms": 1473.0941031436203,
+      "latency_basis": "run-elapsed-per-question",
+      "dbs": 50.024860205021916,
       "families": {
         "voice": {
           "correct": 1553,
@@ -855,67 +867,30 @@
       },
       "measurements": {
         "cost": {
-          "status": "pending",
-          "reason": "Self-hosted on one H200; a median request time alone is insufficient to estimate total billed GPU time."
+          "status": "gpu-runtime-estimate",
+          "source_url": "https://www.runpod.io/gpu-models/h200",
+          "basis": "Full recorded run duration multiplied by the Runpod Community Cloud reference rate for one H200.",
+          "hourly_rate_usd": 3.59,
+          "gpu_count": 1,
+          "hardware": "NVIDIA H200 141 GB",
+          "hardware_source_url": "https://github.com/tazolabs/DECIDE/issues/21",
+          "assumptions": [
+            "Flash submitter reports one H200.",
+            "Assumes the GPU is allocated for the entire hosted run window.",
+            "Reference compute-only estimate; excludes storage, tax and other fees."
+          ],
+          "run_hours": 1.9915413888888889,
+          "value_usd": 7.14963358611111
         },
         "latency": {
-          "status": "pending",
-          "reason": "The submitted temporary tunnel no longer resolves; 500-sample client measurement is pending.",
-          "reported": {
-            "value_ms": 180,
-            "statistic": "median",
-            "scope": "same-machine HTTP",
-            "source_url": "https://github.com/tazolabs/DECIDE/issues/21"
-          }
-        }
-      }
-    },
-    {
-      "id": "laya-embeddinglabs",
-      "name": "Laya (EmbeddingLabs submission)",
-      "input": "audio",
-      "correct": 525,
-      "accuracy": 0.10786932401890281,
-      "cost_usd": null,
-      "latency_ms": null,
-      "latency_basis": "pending",
-      "dbs": null,
-      "families": {
-        "voice": {
-          "correct": 11,
-          "accuracy": 0.005832449628844115
-        },
-        "business": {
-          "correct": 250,
-          "accuracy": 0.1781895937277263
-        },
-        "tools": {
-          "correct": 4,
-          "accuracy": 0.03125
-        },
-        "routing": {
-          "correct": 107,
-          "accuracy": 0.1440107671601615
-        },
-        "turns": {
-          "correct": 83,
-          "accuracy": 0.22074468085106383
-        }
-      },
-      "submission": {
-        "evaluation_id": "a58795ef-79b3-4032-ada3-50ed7956e325",
-        "completed_at": "2026-11-07T18:33:55.598Z",
-        "failed_or_missing": 0,
-        "checked_at": "2026-11-20"
-      },
-      "measurements": {
-        "cost": {
-          "status": "pending",
-          "reason": "No pricing or full-run cost was supplied in the public submission issues."
-        },
-        "latency": {
-          "status": "pending",
-          "reason": "The saved endpoint returns HTTP 404; client timing requires a restored endpoint and API access."
+          "status": "run-time-estimate",
+          "value_ms": 1473.0941031436203,
+          "basis": "Total elapsed run time divided by all 4,867 questions; includes queueing, pauses, retries and database work.",
+          "started_at": "2026-11-10T15:39:01.406Z",
+          "completed_at": "2026-11-10T17:38:30.955Z",
+          "completion_source": "report.completed_at",
+          "elapsed_ms": 7169549,
+          "questions": 4867
         }
       }
     }
