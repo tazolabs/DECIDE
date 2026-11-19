@@ -80,7 +80,8 @@ async function run(args) {
   // One public warm-up verifies access and the response contract before sending private inputs.
   const warmup=(await loadDataset('preview')).questions[0];
   const warmAudio=modality==='audio'?await audioBytes(warmup,'preview'):null;
-  await predictModel(job,warmup,key,warmAudio,'latency-preflight-'+randomUUID());
+  const preflight=await measureQuestion({job,question:warmup,key,audio:warmAudio,requestId:'latency-preflight-'+randomUUID(),retries});
+  if(preflight.status!=='ok') throw new PublicError(preflight.code,422);
   const dataset=await loadDataset('benchmark');
   const questions=selectLatencySample(dataset.questions,count,opts.seed);
   const settings={model,endpoint,modality,seed:opts.seed || 'decide-community-latency-v1',count,
