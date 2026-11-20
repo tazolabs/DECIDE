@@ -78,7 +78,7 @@
     },
     {
       "id": "laya-embeddinglabs",
-      "name": "Laya (EmbeddingLabs submission)",
+      "name": "Laya",
       "model_id": "laya-embeddinglabs",
       "evaluation_id": "a58795ef-79b3-4032-ada3-50ed7956e325",
       "cost": {
