@@ -27,8 +27,8 @@ unavailable, updated_at is the documented fallback for a completed run.
 These values are estimates of elapsed hosted run time per question. They include
 queueing, the evaluator's one-second pauses, retries, storage downloads and
 database work. They are not isolated model/server response latency. Existing
-leaderboard entries retain their documented latency bases, so the website marks
-these new entries “Run time ÷ 4,867” and notes the evaluator overhead.
+leaderboard entries retain their documented latency bases. Measurement bases
+are recorded in the snapshot metadata and this guide.
 
 ## Cost method
 
