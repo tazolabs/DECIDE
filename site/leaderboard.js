@@ -28,24 +28,11 @@ function showTable(data, sort = 'dbs') {
     tr.append(node('td', 'rank-column', String(index + 1).padStart(2, '0')));
     const name = node('th', 'model-name');
     name.scope = 'row';
-    name.append(node('span', '', model.name), node('small', '', model.input === 'audio'
-      ? model.submission ? 'Hosted audio submission' : 'Direct audio' : 'STT + text'));
+    name.append(node('span', '', model.name), node('small', '', model.input === 'audio' ? 'Direct audio' : 'STT + text'));
     tr.append(name);
     for (const [key, value] of [['accuracy', percent(model.accuracy)], ['cost', money(model.cost_usd)],
       ['latency', latency(model.latency_ms)], ['dbs', model.dbs.toFixed(2)]]) {
-      const cell = node('td', `metric-column ${key === sort ? 'sorted-metric' : ''} ${key === 'dbs' ? 'dbs-column' : ''}`, value);
-      if (key === 'cost' && ['submitter-estimate','gpu-runtime-estimate','token-usage-estimate'].includes(model.measurements?.cost?.status)) {
-        const source = node('a', 'metric-detail', model.measurements.cost.status === 'gpu-runtime-estimate' ? 'GPU run estimate' : 'Cost estimate');
-        source.href = model.measurements.cost.source_url;
-        source.title = [model.measurements.cost.basis, ...(model.measurements.cost.assumptions || [])].filter(Boolean).join(' ');
-        cell.append(source);
-      }
-      if (key === 'latency' && model.latency_basis === 'run-elapsed-per-question') {
-        const method=node('small','metric-detail','Run time ÷ 4,867');
-        method.title=model.measurements.latency.basis;
-        cell.append(method);
-      }
-      tr.append(cell);
+      tr.append(node('td', `metric-column ${key === sort ? 'sorted-metric' : ''} ${key === 'dbs' ? 'dbs-column' : ''}`, value));
     }
     body.append(tr);
   });
@@ -249,7 +236,7 @@ async function init() {
     document.querySelectorAll('[data-leaderboard-content]').forEach(section => section.hidden = false);
     await document.fonts.ready;
     showFrontier(data);
-    document.querySelector('#score-references').textContent = `A = accuracy (0–1), C = run cost, L = latency estimate. Fixed reference medians: Cₘ = $${data.reference.cost_usd.toFixed(4)}; Lₘ = ${(data.reference.latency_ms / 1000).toFixed(3)} s.`;
+    document.querySelector('#score-references').textContent = `A = accuracy (0–1), C = run cost, L = latency. Fixed reference medians: Cₘ = $${data.reference.cost_usd.toFixed(4)}; Lₘ = ${(data.reference.latency_ms / 1000).toFixed(3)} s.`;
     document.querySelector('#leaderboard-loading').hidden = true;
   } catch {
     document.querySelector('#leaderboard-loading').textContent = 'The leaderboard could not be loaded. Please refresh to try again.';

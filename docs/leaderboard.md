@@ -4,6 +4,10 @@ The `/leaderboard` page reads the aggregate snapshot at `site/data/leaderboard.j
 
 The table defaults to DBS, descending. Accuracy sorts descending and latency ascending. The voice-properties highlight shows Tazo's actual rank among all published models, regardless of its position. The table below shows five models by accuracy, with DBS as the tie break. The underlying snapshot retains all five task-family aggregates.
 
+Model subtitles show `Direct audio` or `STT + text` according to input modality.
+Cost and latency cells display their numeric values. Measurement methods are
+recorded in the snapshot metadata and documentation.
+
 DBS uses equal-weight geometric averaging:
 
 ```text
