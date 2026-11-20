@@ -1,17 +1,17 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
-import { decisionBalanceScore, frontierPoints, hasCompleteMeasurements, normalizedEfficiency, normalizedLatency, percentileRanks, sortModels, topFamilyModels, validateLeaderboard } from '../site/leaderboard-model.js';
+import { decisionBalanceScore, familyModelRank, frontierPoints, hasCompleteMeasurements, normalizedEfficiency, normalizedLatency, percentileRanks, sortModels, topFamilyModels, validateLeaderboard } from '../site/leaderboard-model.js';
 import { publicLeaderboard } from '../tools/export-leaderboard.mjs';
 
 const snapshot = JSON.parse(await readFile(new URL('../site/data/leaderboard.json', import.meta.url), 'utf8'));
 const completeModels = snapshot.models.filter(hasCompleteMeasurements);
 
-test('the published snapshot reconciles accuracy and DBS for all 24 priced entries', () => {
+test('the published snapshot reconciles accuracy and DBS for all 25 priced entries', () => {
   assert.equal(validateLeaderboard(snapshot), snapshot);
   assert.equal(snapshot.questions, 4867);
-  assert.equal(snapshot.models.length, 24);
-  assert.equal(completeModels.length, 24);
+  assert.equal(snapshot.models.length, 25);
+  assert.equal(completeModels.length, 25);
   assert.deepEqual(snapshot.families.map(f => f.id), ['voice', 'business', 'tools', 'routing', 'turns']);
   const tazo = snapshot.models.find(model => model.id === 'tazo');
   assert.equal(tazo.name, 'Tazo');
@@ -29,7 +29,7 @@ test('all three table sort modes use the requested direction without mutating th
   const dbs = sortModels(snapshot.models);
   const accuracy = sortModels(snapshot.models, 'accuracy');
   const latency = sortModels(snapshot.models, 'latency');
-  assert.equal(dbs[0].id, 'tazo');
+  assert.equal(dbs[0].id, 'gemini-decision-1');
   assert.equal(accuracy[0].name, 'Gemini 2.5 Flash');
   assert.equal(latency[0].id, 'tazo');
   for (let i = 1; i < snapshot.models.length; i++) {
@@ -61,6 +61,15 @@ test('family rankings support the top-five voice table and use DBS as a determin
   const tiedTurnModels = snapshot.models.filter(m => m.name === 'Gemini 2.5 Flash' || m.name === 'Gemini 2.5 Pro');
   assert.equal(tiedTurnModels[0].families.turns.correct, tiedTurnModels[1].families.turns.correct);
   assert.equal(topFamilyModels(snapshot.models, 'turns')[2].name, 'Gemini 2.5 Flash');
+});
+
+test('the Tazo spotlight uses its actual family rank even outside the top five', () => {
+  const ranked=topFamilyModels(snapshot.models,'voice',snapshot.models.length);
+  assert.equal(familyModelRank(snapshot.models,'voice','tazo'),ranked.findIndex(model=>model.id==='tazo')+1);
+  const models=Array.from({length:7},(_,i)=>({id:i===6?'tazo':`model-${i}`,name:`Model ${i}`,dbs:50,
+    families:{voice:{accuracy:1-i/10}}}));
+  assert.equal(familyModelRank(models,'voice','tazo'),7);
+  assert.throws(()=>familyModelRank(models,'voice','missing'));
 });
 
 test('normalized latency is bounded, monotonic, median-centered and independent of time units', () => {
@@ -111,7 +120,7 @@ test('the top-left frontier preserves the raw efficiency–latency dominance rel
   assert.deepEqual(percentileRanks([1]), [50]);
   assert.throws(() => percentileRanks([NaN]));
   const points = frontierPoints(snapshot.models, snapshot.reference);
-  assert.equal(points.length, 24);
+  assert.equal(points.length, 25);
   for (const point of points) {
     assert(point.x >= 0 && point.x <= 100 && point.y >= 0 && point.y <= 100);
     const dominated = points.some(other => other.x <= point.x && other.y >= point.y && (other.x < point.x || other.y > point.y));

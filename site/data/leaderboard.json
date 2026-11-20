@@ -768,10 +768,10 @@
       "input": "audio",
       "correct": 3458,
       "accuracy": 0.7104992808711732,
-      "cost_usd": 1.5,
+      "cost_usd": 3.90490184,
       "latency_ms": 1579.4575713992192,
       "latency_basis": "run-elapsed-per-question",
-      "dbs": 64.58141121077009,
+      "dbs": 57.07871978000148,
       "families": {
         "voice": {
           "correct": 1520,
@@ -803,16 +803,28 @@
       },
       "measurements": {
         "cost": {
-          "status": "submitter-estimate",
-          "value_usd": 1.5,
-          "source_url": "https://github.com/tazolabs/DECIDE/issues/20",
-          "basis": "Submitter estimates approximately $1.50 for the full 4,867-question run; this is not an invoice or a reconstruction of token usage.",
+          "status": "token-usage-estimate",
+          "source_url": "https://sprag.ai/spev",
+          "basis": "Estimated audio and text input tokens times SPEV's published rates across all 4,867 questions; no output charge.",
           "rate_source_url": "https://sprag.ai/spev",
+          "assumptions": [
+            "Audio tokenization assumes 25 tokens per second, supplied as a reference; actual SPEV billing usage is unavailable.",
+            "Text counts use the current published SPEV tokenizer and processor formatting, including repeated question instructions per criterion.",
+            "Counts repeated audio and context for each question; historical hosted adapter formatting, preflights and retries are not reconstructed.",
+            "Reference token-cost estimate, not an observed invoice."
+          ],
+          "audio_seconds": 56158.87,
+          "audio_tokens_per_second": 25,
+          "audio_input_tokens": 1403971.75,
+          "text_input_tokens": 12188426,
+          "tokenizer_revision": "8946843d99acedff7686863e9608d654fd7d2295",
+          "tokenizer_source_url": "https://huggingface.co/SpragAI/SPEV/tree/8946843d99acedff7686863e9608d654fd7d2295",
           "rates": {
             "audio_input_usd_per_million_tokens": 2,
             "text_input_usd_per_million_tokens": 0.09,
             "output_usd": 0
-          }
+          },
+          "value_usd": 3.90490184
         },
         "latency": {
           "status": "run-time-estimate",
@@ -961,6 +973,70 @@
           "elapsed_ms": 11330687,
           "questions": 4867
         }
+      }
+    },
+    {
+      "id": "gemini-decision-1",
+      "name": "Gemini Decision 1",
+      "company": "Google",
+      "input": "audio",
+      "correct": 3483,
+      "accuracy": 0.7156359153482638,
+      "cost_usd": 1.2138589,
+      "latency_ms": 891.5044818734311,
+      "latency_basis": "client",
+      "dbs": 71.20975530123965,
+      "families": {
+        "voice": {
+          "correct": 1454,
+          "accuracy": 0.7709437963944857
+        },
+        "business": {
+          "correct": 948,
+          "accuracy": 0.6756949394155382
+        },
+        "tools": {
+          "correct": 69,
+          "accuracy": 0.5390625
+        },
+        "routing": {
+          "correct": 510,
+          "accuracy": 0.6864064602960969
+        },
+        "turns": {
+          "correct": 210,
+          "accuracy": 0.5585106382978723
+        }
+      },
+      "measurements": {
+        "cost": {
+          "status": "api-usage-estimate",
+          "value_usd": 1.2138589,
+          "source_url": "https://aistudio.google.com/docs/pricing#gemini-decision",
+          "input_usd_per_million_tokens": 0.1,
+          "total_input_tokens": 12138589,
+          "input_tokens_by_modality": {
+            "text": 10440966,
+            "audio": 1697623
+          },
+          "priced_responses": 4867,
+          "basis": "Returned input-token usage times the published standard paid-tier rate; includes all journaled responses, including invalid choices and reruns. No output charge."
+        },
+        "latency": {
+          "status": "measured-http",
+          "value_ms": 891.5044818734311,
+          "n": 4867,
+          "median_ms": 705.7322919999933,
+          "p95_ms": 1802.3694580001575,
+          "basis": "Final successful HTTP request, including network and upload; excludes local pacing, retry backoff and dataset verification."
+        }
+      },
+      "evaluation": {
+        "completed_at": "2026-11-20T13:37:10.463519+00:00",
+        "failed_or_missing": 0,
+        "dataset_fingerprint": "e55f07455b7b218f37c7f156836b6568e88d77bfa50033199e97f368d47db187",
+        "adapter_version": "decide-google-native-decisions-audio-v1",
+        "source_url": "https://aistudio.google.com/docs/decisions-api"
       }
     }
   ]

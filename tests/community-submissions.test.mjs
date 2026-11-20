@@ -12,18 +12,18 @@ test('hosted accuracy includes failed answers in the full denominator',()=>{
   assert.equal(spev.accuracy,3458/4867);
   assert.equal(spev.submission.failed_or_missing,4);
   assert.notEqual(spev.accuracy,3458/4863);
-  assert.equal(spev.cost_usd,1.5);
-  assert.equal(spev.measurements.cost.status,'submitter-estimate');
+  assert(Math.abs(spev.cost_usd-3.90490184)<1e-10);
+  assert.equal(spev.measurements.cost.status,'token-usage-estimate');
 });
 
 test('every published entry has a cost, latency and score, including the Laya reference estimate',()=>{
-  assert.equal(snapshot.models.length,24);
+  assert.equal(snapshot.models.length,25);
   assert(snapshot.models.every(hasCompleteMeasurements));
   const laya=snapshot.models.find(m=>m.id==='laya-embeddinglabs');
   assert.equal(laya.cost_usd,11330687/3600000*1.99);
   assert.equal(laya.latency_ms,11330687/4867);
   assert(laya.measurements.cost.assumptions.some(s=>s.includes('actual hardware and API price are unspecified')));
-  assert.equal(frontierPoints(snapshot.models,snapshot.reference).length,24);
+  assert.equal(frontierPoints(snapshot.models,snapshot.reference).length,25);
   for(const model of snapshot.models) assert(Math.abs(model.dbs-decisionBalanceScore(model,snapshot.reference))<1e-8);
   for(const value of [0,null,NaN]) {
     const invalid=structuredClone(snapshot);
@@ -61,6 +61,16 @@ test('GPU cost uses the entire run window and a documented per-GPU hourly refere
     assert.equal(model.measurements.cost.hardware,'NVIDIA H100 PCIe 80 GB');
   }
   assert.equal(turbo.latency_basis,'run-elapsed-per-question');
+});
+
+test('SPEV estimate prices both audio and complete formatted text with explicit assumptions',()=>{
+  const cost=snapshot.models.find(model=>model.id==='spev').measurements.cost;
+  assert.equal(cost.audio_tokens_per_second,25);
+  assert.equal(cost.text_input_tokens,12188426);
+  assert.equal(cost.audio_input_tokens,56158.87*25);
+  assert.equal(hostedRunCost(cost,{}).value_usd,(1403971.75*2+12188426*.09)/1e6);
+  assert.throws(()=>hostedRunCost({...cost,audio_input_tokens:1},{}));
+  assert(cost.assumptions.some(text=>text.includes('actual SPEV billing usage is unavailable')));
 });
 
 test('import computes estimates, skips unpriced runs, rejects partial runs and strips private fields',()=>{

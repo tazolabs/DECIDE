@@ -26,6 +26,12 @@ export function topFamilyModels(models, family, limit = 3) {
     || b.dbs - a.dbs || a.name.localeCompare(b.name)).slice(0, limit);
 }
 
+export function familyModelRank(models, family, id) {
+  const index = topFamilyModels(models, family, models.length).findIndex(model => model.id === id);
+  if (index < 0) throw new Error('Ranked model not found');
+  return index + 1;
+}
+
 export function percentileRanks(values, higherIsBetter = true) {
   if (!values.length || !values.every(Number.isFinite)) throw new Error('Invalid percentile inputs');
   if (values.length === 1) return [50];

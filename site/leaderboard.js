@@ -1,4 +1,4 @@
-import { frontierPoints, sortModels, topFamilyModels, validateLeaderboard } from './leaderboard-model.js';
+import { familyModelRank, frontierPoints, sortModels, topFamilyModels, validateLeaderboard } from './leaderboard-model.js';
 
 const percent = value => `${(100 * value).toFixed(2)}%`;
 const money = value => `$${value.toFixed(2)}`;
@@ -34,7 +34,7 @@ function showTable(data, sort = 'dbs') {
     for (const [key, value] of [['accuracy', percent(model.accuracy)], ['cost', money(model.cost_usd)],
       ['latency', latency(model.latency_ms)], ['dbs', model.dbs.toFixed(2)]]) {
       const cell = node('td', `metric-column ${key === sort ? 'sorted-metric' : ''} ${key === 'dbs' ? 'dbs-column' : ''}`, value);
-      if (key === 'cost' && ['submitter-estimate','gpu-runtime-estimate'].includes(model.measurements?.cost?.status)) {
+      if (key === 'cost' && ['submitter-estimate','gpu-runtime-estimate','token-usage-estimate'].includes(model.measurements?.cost?.status)) {
         const source = node('a', 'metric-detail', model.measurements.cost.status === 'gpu-runtime-estimate' ? 'GPU run estimate' : 'Cost estimate');
         source.href = model.measurements.cost.source_url;
         source.title = [model.measurements.cost.basis, ...(model.measurements.cost.assumptions || [])].filter(Boolean).join(' ');
@@ -80,11 +80,10 @@ function showVoiceLeaders(data) {
     row.append(heading, node('td', 'metric-column voice-accuracy', percent(model.families.voice.accuracy)));
     body.append(row);
   });
-  const leader = topFamilyModels(data.models, 'voice', 1)[0];
-  document.querySelector('#voice-leader-accuracy').textContent = percent(leader.families.voice.accuracy);
-  document.querySelector('#voice-leader-name').textContent = `#1 · ${leader.name}`;
-  document.querySelector('#voice-title').textContent = 'Voice-based decisions. Current leaders.';
-  document.querySelector('#voice-brand').hidden = leader.id !== 'tazo';
+  const rank = familyModelRank(data.models, 'voice', 'tazo');
+  document.querySelector('#voice-tazo-rank').textContent = `#${rank}`;
+  document.querySelector('#voice-rank-label').textContent = `Tazo · among ${data.models.length} models`;
+  document.querySelector('#voice-brand').hidden = false;
 }
 
 // Keep every label legible without moving its data point. Leader lines connect displaced names.

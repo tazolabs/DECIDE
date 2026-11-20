@@ -8,7 +8,7 @@ tests are excluded.
 | Model | Correct | Failed | Accuracy | Recorded full-run time | Time per question | Estimated run cost |
 | --- | ---: | ---: | ---: | --- | ---: | ---: |
 | Nirnaya Turbo 1.0 | 3,494 | 0 | 71.79% | 2h 02m 34.381s | 1,511.07 ms | $4.07 |
-| SPEV | 3,458 | 4 | 71.05% | 2h 08m 07.220s | 1,579.46 ms | ~$1.50 |
+| SPEV | 3,458 | 4 | 71.05% | 2h 08m 07.220s | 1,579.46 ms | $3.90 |
 | Nirnaya Flash 1.0 | 3,195 | 0 | 65.65% | 1h 59m 29.549s | 1,473.09 ms | $3.96 |
 | Laya (EmbeddingLabs submission) | 525 | 0 | 10.79% | 3h 08m 50.687s | 2,328.06 ms | $6.26 |
 
@@ -49,11 +49,17 @@ Cloud rate; this calculation specifically uses the Community Cloud rate.
 - Turbo's recorded run lasted 2.042883611 hours; one reference H100 costs $4.065338386. Its actual GPU type is unspecified.
 - Laya's recorded run lasted 3.147413056 hours; one reference H100 costs $6.263351981. Its actual hardware and API price are unspecified.
 - These estimates retain the recorded run windows. H100 performance has not been remeasured, and the reference GPU is not a claim about the original hardware or actual bill.
-- [SPEV's submission](https://github.com/tazolabs/DECIDE/issues/20) estimates
-  approximately **$1.50 for the full run**. The [provider's SPEV page](https://sprag.ai/spev)
-  confirms $2 per million audio input tokens, $0.09 per million text/image input
-  tokens, and no output charge. Duration alone cannot reconstruct token billing;
-  the leaderboard retains the attributed full-run cost estimate.
+- SPEV uses the [provider's published rates](https://sprag.ai/spev): $2 per million
+  audio input tokens and $0.09 per million text input tokens, with no output charge.
+  Across all 4,867 requests, 56,158.87 audio seconds at an assumed 25 tokens/second
+  gives 1,403,971.75 estimated audio tokens ($2.8079435). Tokenizing all prompts,
+  context and criteria with the current published SPEV tokenizer and processor
+  formatting gives 12,188,426 text tokens ($1.09695834), for **$3.90490184 total**.
+  The tokenizer/format revision and assumptions are stored in the metadata.
+  The 25 audio-token/second rate is a supplied reference, not verified SPEV usage;
+  historical adapter differences and retry/preflight charges are not reconstructed.
+  This replaces the submitter's approximate $1.50 estimate rather than treating
+  either value as an invoice.
 
 The same fixed DBS reference constants and score formula apply to all eligible
 models. These four models now have DBS scores and Pareto-chart points.

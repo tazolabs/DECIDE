@@ -7,7 +7,7 @@ import {decisionBalanceScore, hasCompleteMeasurements, validateLeaderboard} from
 const FAMILIES = {voice:'Voice properties',business:'Business and conversation',tools:'Tool decisions',routing:'Graph routing',turns:'Turn taking'};
 
 function publicMeasurement(value,kind) {
-  const keys=kind==='cost'?['status','reason','value_usd','source_url','basis','rate_source_url','hourly_rate_usd','gpu_count','hardware','hardware_source_url','assumptions','run_hours']:['status','value_ms','basis','started_at','completed_at','completion_source','elapsed_ms','questions'];
+  const keys=kind==='cost'?['status','reason','value_usd','source_url','basis','rate_source_url','hourly_rate_usd','gpu_count','hardware','hardware_source_url','assumptions','run_hours','audio_seconds','audio_tokens_per_second','audio_input_tokens','text_input_tokens','tokenizer_revision','tokenizer_source_url']:['status','value_ms','basis','started_at','completed_at','completion_source','elapsed_ms','questions'];
   const output=Object.fromEntries(keys.filter(key=>Object.hasOwn(value,key)).map(key=>[key,value[key]]));
   if(kind==='cost' && value.rates) output.rates=Object.fromEntries(
     ['audio_input_usd_per_million_tokens','text_input_usd_per_million_tokens','output_usd'].filter(key=>Object.hasOwn(value.rates,key)).map(key=>[key,value.rates[key]]));
@@ -32,6 +32,15 @@ export function hostedRunTiming(job) {
 
 export function hostedRunCost(cost,timing) {
   if(cost.status==='pending') return null;
+  if(cost.status==='token-usage-estimate') {
+    const audio=cost.audio_input_tokens, text=cost.text_input_tokens;
+    const audioRate=cost.rates?.audio_input_usd_per_million_tokens, textRate=cost.rates?.text_input_usd_per_million_tokens;
+    if(![audio,text,audioRate,textRate].every(Number.isFinite) || Math.min(audio,text,audioRate,textRate)<=0
+        || cost.rates.output_usd!==0 || !Number.isFinite(cost.audio_seconds) || cost.audio_seconds<=0
+        || !Number.isFinite(cost.audio_tokens_per_second) || cost.audio_tokens_per_second<=0
+        || Math.abs(audio-cost.audio_seconds*cost.audio_tokens_per_second)>1e-7) throw new Error('Invalid token cost estimate');
+    return {...publicMeasurement(cost,'cost'),value_usd:(audio*audioRate+text*textRate)/1e6};
+  }
   if(cost.status==='gpu-runtime-estimate') {
     if(!Number.isFinite(cost.hourly_rate_usd) || cost.hourly_rate_usd<=0 || !Number.isInteger(cost.gpu_count) || cost.gpu_count<1) throw new Error('Invalid GPU reference rate');
     const run_hours=timing.elapsed_ms/3600000;

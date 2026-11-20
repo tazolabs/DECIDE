@@ -31,10 +31,21 @@
       "evaluation_id": "143e137b-014f-4e38-844e-c41a9a25ab83",
       "source_url": "https://github.com/tazolabs/DECIDE/issues/20",
       "cost": {
-        "status": "submitter-estimate",
-        "value_usd": 1.5,
-        "source_url": "https://github.com/tazolabs/DECIDE/issues/20",
-        "basis": "Submitter estimates approximately $1.50 for the full 4,867-question run; this is not an invoice or a reconstruction of token usage.",
+        "status": "token-usage-estimate",
+        "source_url": "https://sprag.ai/spev",
+        "basis": "Estimated audio and text input tokens times SPEV's published rates across all 4,867 questions; no output charge.",
+        "audio_seconds": 56158.87,
+        "audio_tokens_per_second": 25,
+        "audio_input_tokens": 1403971.75,
+        "text_input_tokens": 12188426,
+        "tokenizer_revision": "8946843d99acedff7686863e9608d654fd7d2295",
+        "tokenizer_source_url": "https://huggingface.co/SpragAI/SPEV/tree/8946843d99acedff7686863e9608d654fd7d2295",
+        "assumptions": [
+          "Audio tokenization assumes 25 tokens per second, supplied as a reference; actual SPEV billing usage is unavailable.",
+          "Text counts use the current published SPEV tokenizer and processor formatting, including repeated question instructions per criterion.",
+          "Counts repeated audio and context for each question; historical hosted adapter formatting, preflights and retries are not reconstructed.",
+          "Reference token-cost estimate, not an observed invoice."
+        ],
         "rates": {
           "audio_input_usd_per_million_tokens": 2,
           "text_input_usd_per_million_tokens": 0.09,
