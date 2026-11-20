@@ -16,9 +16,20 @@ export function sortModels(models, sort = 'dbs') {
   return [...models].sort((a, b) => direction * (a[field] - b[field]) || b.dbs - a.dbs || a.name.localeCompare(b.name));
 }
 
+export function hasCompleteMeasurements(model) {
+  return Number.isFinite(model.cost_usd) && model.cost_usd > 0
+    && Number.isFinite(model.latency_ms) && model.latency_ms > 0;
+}
+
 export function topFamilyModels(models, family, limit = 3) {
   return [...models].sort((a, b) => b.families[family].accuracy - a.families[family].accuracy
     || b.dbs - a.dbs || a.name.localeCompare(b.name)).slice(0, limit);
+}
+
+export function familyModelRank(models, family, id) {
+  const index = topFamilyModels(models, family, models.length).findIndex(model => model.id === id);
+  if (index < 0) throw new Error('Ranked model not found');
+  return index + 1;
 }
 
 export function percentileRanks(values, higherIsBetter = true) {
@@ -51,6 +62,8 @@ export function normalizedEfficiency(efficiency, reference) {
 }
 
 export function frontierPoints(models, reference) {
+  models = models.filter(hasCompleteMeasurements);
+  if (!models.length) return [];
   const efficiency = models.map(model => model.accuracy / model.cost_usd);
   const ordered = [...efficiency].sort((a, b) => a - b);
   const middle = Math.floor(ordered.length / 2);
@@ -74,7 +87,9 @@ export function validateLeaderboard(data) {
     if (!model.id || ids.has(model.id) || typeof model.name !== 'string' || !model.name.trim()
         || !['audio', 'stt-text'].includes(model.input) || !Number.isInteger(model.correct)
         || model.correct < 0 || model.correct > data.questions
+        || !Number.isFinite(model.accuracy)
         || Math.abs(model.accuracy - model.correct / data.questions) > 1e-12
+        || !hasCompleteMeasurements(model)
         || !Number.isFinite(model.dbs) || Math.abs(decisionBalanceScore(model, data.reference) - model.dbs) > 1e-8) {
       throw new Error('Invalid model metrics');
     }

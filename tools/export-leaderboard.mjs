@@ -13,7 +13,7 @@ const FAMILIES = [
 ];
 
 export function publicLeaderboard(source) {
-  if (source.questions !== 4867 || source.models?.length !== 20) throw new Error('Expected the approved 4,867-question, 20-model report');
+  if (source.questions !== 4867 || !Array.isArray(source.models) || !source.models.length) throw new Error('Expected a nonempty 4,867-question report');
   const snapshot = {
     schema_version: 1,
     questions: source.questions,

@@ -1,0 +1,100 @@
+{
+  "checked_at": "2026-11-20",
+  "entries": [
+    {
+      "id": "nirnaya-turbo-1-0",
+      "name": "Nirnaya Turbo 1.0",
+      "model_id": "nirnaya-turbo-1.0",
+      "evaluation_id": "e8ee7984-d482-4768-8b6f-312dca53775e",
+      "source_url": "https://github.com/tazolabs/DECIDE/issues/21#issuecomment-6778380819",
+      "cost": {
+        "status": "gpu-runtime-estimate",
+        "hourly_rate_usd": 1.99,
+        "gpu_count": 1,
+        "hardware": "NVIDIA H100 PCIe 80 GB",
+        "source_url": "https://www.runpod.io/gpu-models/h100",
+        "basis": "Full recorded run duration multiplied by the Runpod Community Cloud reference rate for one H100 PCIe 80 GB.",
+        "assumptions": [
+          "Uses a one-H100 reference configuration for Turbo; its actual GPU type is not independently confirmed.",
+          "Assumes the GPU is allocated for the entire recorded hosted run window.",
+          "The recorded run window is retained; performance on an H100 has not been measured.",
+          "Reference compute-only estimate; excludes storage, tax and other fees."
+        ],
+        "hardware_source_url": "https://github.com/tazolabs/DECIDE/issues/21"
+      }
+    },
+    {
+      "id": "spev",
+      "name": "SPEV",
+      "company": "Sprag",
+      "model_id": "spev",
+      "evaluation_id": "143e137b-014f-4e38-844e-c41a9a25ab83",
+      "source_url": "https://github.com/tazolabs/DECIDE/issues/20",
+      "cost": {
+        "status": "token-usage-estimate",
+        "source_url": "https://sprag.ai/spev",
+        "basis": "Estimated audio and text input tokens times SPEV's published rates across all 4,867 questions; no output charge.",
+        "audio_seconds": 56158.87,
+        "audio_tokens_per_second": 25,
+        "audio_input_tokens": 1403971.75,
+        "text_input_tokens": 12188426,
+        "tokenizer_revision": "8946843d99acedff7686863e9608d654fd7d2295",
+        "tokenizer_source_url": "https://huggingface.co/SpragAI/SPEV/tree/8946843d99acedff7686863e9608d654fd7d2295",
+        "assumptions": [
+          "Audio tokenization assumes 25 tokens per second, supplied as a reference; actual SPEV billing usage is unavailable.",
+          "Text counts use the current published SPEV tokenizer and processor formatting, including repeated question instructions per criterion.",
+          "Counts repeated audio and context for each question; historical hosted adapter formatting, preflights and retries are not reconstructed.",
+          "Reference token-cost estimate, not an observed invoice."
+        ],
+        "rates": {
+          "audio_input_usd_per_million_tokens": 2,
+          "text_input_usd_per_million_tokens": 0.09,
+          "output_usd": 0
+        },
+        "rate_source_url": "https://sprag.ai/spev"
+      }
+    },
+    {
+      "id": "nirnaya-flash-1-0",
+      "name": "Nirnaya Flash 1.0",
+      "model_id": "nirnaya-flash-1.0",
+      "evaluation_id": "a282dd7f-98d4-4105-8a01-2a54778d6ecf",
+      "source_url": "https://github.com/tazolabs/DECIDE/issues/21",
+      "cost": {
+        "status": "gpu-runtime-estimate",
+        "hourly_rate_usd": 1.99,
+        "gpu_count": 1,
+        "hardware": "NVIDIA H100 PCIe 80 GB",
+        "source_url": "https://www.runpod.io/gpu-models/h100",
+        "basis": "Full recorded run duration multiplied by the Runpod Community Cloud reference rate for one H100 PCIe 80 GB.",
+        "assumptions": [
+          "Uses a one-H100 reference configuration for cost; the Flash submitter reported running on an H200.",
+          "Assumes the GPU is allocated for the entire recorded hosted run window.",
+          "The recorded run window is retained; performance on an H100 has not been measured.",
+          "Reference compute-only estimate; excludes storage, tax and other fees."
+        ],
+        "hardware_source_url": "https://github.com/tazolabs/DECIDE/issues/21"
+      }
+    },
+    {
+      "id": "laya-embeddinglabs",
+      "name": "Laya (EmbeddingLabs submission)",
+      "model_id": "laya-embeddinglabs",
+      "evaluation_id": "a58795ef-79b3-4032-ada3-50ed7956e325",
+      "cost": {
+        "status": "gpu-runtime-estimate",
+        "hourly_rate_usd": 1.99,
+        "gpu_count": 1,
+        "hardware": "NVIDIA H100 PCIe 80 GB",
+        "source_url": "https://www.runpod.io/gpu-models/h100",
+        "basis": "Full recorded run duration multiplied by the Runpod Community Cloud reference rate for one H100 PCIe 80 GB.",
+        "assumptions": [
+          "Uses a one-H100 reference configuration for Laya; its actual hardware and API price are unspecified.",
+          "Assumes the GPU is allocated for the entire recorded hosted run window.",
+          "The recorded run window is retained; performance on an H100 has not been measured.",
+          "Reference compute-only estimate; excludes storage, tax and other fees."
+        ]
+      }
+    }
+  ]
+}
