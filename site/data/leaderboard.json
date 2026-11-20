@@ -910,7 +910,7 @@
     },
     {
       "id": "laya-embeddinglabs",
-      "name": "Laya (EmbeddingLabs submission)",
+      "name": "Laya",
       "input": "audio",
       "correct": 525,
       "accuracy": 0.10786932401890281,

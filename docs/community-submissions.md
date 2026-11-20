@@ -10,7 +10,7 @@ tests are excluded.
 | Nirnaya Turbo 1.0 | 3,494 | 0 | 71.79% | 2h 02m 34.381s | 1,511.07 ms | $4.07 |
 | SPEV | 3,458 | 4 | 71.05% | 2h 08m 07.220s | 1,579.46 ms | $3.90 |
 | Nirnaya Flash 1.0 | 3,195 | 0 | 65.65% | 1h 59m 29.549s | 1,473.09 ms | $3.96 |
-| Laya (EmbeddingLabs submission) | 525 | 0 | 10.79% | 3h 08m 50.687s | 2,328.06 ms | $6.26 |
+| Laya | 525 | 0 | 10.79% | 3h 08m 50.687s | 2,328.06 ms | $6.26 |
 
 ## Latency method
 
